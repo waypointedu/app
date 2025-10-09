@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 
+
 export default {
   content: [
     join('src', '**', '*.{astro,js,jsx,ts,tsx,mdx}')
