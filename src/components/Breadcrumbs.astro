@@ -1,0 +1,18 @@
+---
+const { current } = Astro.props as { current: string };
+const crumbs = [
+  { href: '/', label: 'Home' },
+  { href: '/browse', label: 'Browse' }
+];
+---
+<nav class="mb-6 text-sm text-slate-500" aria-label="Breadcrumb">
+  <ol class="flex items-center gap-2">
+    {crumbs.map((crumb, index) => (
+      <li class="flex items-center gap-2" key={crumb.href}>
+        <a href={crumb.href} class="hover:text-primary-600">{crumb.label}</a>
+        <span aria-hidden="true">/</span>
+      </li>
+    ))}
+    <li class="text-slate-700 dark:text-slate-200">{current}</li>
+  </ol>
+</nav>
