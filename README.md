@@ -42,7 +42,8 @@ GitHub Pages. To activate automatic deploys:
 
 1. Push the project to GitHub and open **Settings → Pages**.
 2. Under **Build and deployment**, choose **Source → GitHub Actions** (you do not need to
-   select a branch).
+   select a branch). Choosing **Deploy from a branch** disables the workflow-driven publish
+   and will leave the site stuck in a "pending" state.
 3. Commit to the default branch (e.g., `main`). Every push triggers the workflow which
    runs the build and then calls `actions/deploy-pages` to publish the site.
 4. Watch the workflow run under **Actions → Build and Deploy**. Once the `deploy` job
