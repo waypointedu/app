@@ -1,0 +1,12 @@
+[
+  {
+    "id": "augustine-hippo",
+    "name": "Augustine of Hippo",
+    "roles": ["author"]
+  },
+  {
+    "id": "jane-austen",
+    "name": "Jane Austen",
+    "roles": ["author"]
+  }
+]

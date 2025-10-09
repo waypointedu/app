@@ -1,0 +1,23 @@
+---
+import CollectionLayout from '../../layouts/Collection.astro';
+import ResultsGrid from '../../components/ResultsGrid.astro';
+import collections from '../../data/collections.json';
+import index from '../../../search/index.json';
+
+const { slug } = Astro.params;
+const collection = collections.find((entry) => entry.slug === slug);
+
+if (!collection) {
+  throw new Error(`Collection ${slug} not found`);
+}
+
+const records = index.filter((record) => record.collection.toLowerCase().replace(/\s+/g, '-') === slug);
+---
+<CollectionLayout>
+  <header class="space-y-4">
+    <p class="text-sm uppercase tracking-widest text-primary-500">Collection</p>
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">{collection.title}</h1>
+    <p class="max-w-3xl text-lg text-slate-600 dark:text-slate-300">{collection.description}</p>
+  </header>
+  <ResultsGrid results={records} />
+</CollectionLayout>
