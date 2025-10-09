@@ -20,6 +20,12 @@ node scripts/build-site.mjs         # regenerates docs/ and search/index.json
 
 `build-site.mjs` rebuilds every HTML page, refreshes the search index at both `search/index.json` and `docs/search/index.json`, and regenerates the record detail views under `docs/record/<id>/`.
 
+### Dynamic interface features
+
+- The home page hero rotates featured titles, animates library metrics, and hydrates interactive fiction/non-fiction/genre shelves from the `_records` metadata.
+- Search offers live keyword filtering with removable filter chips, genre facets, and an adaptive shelf preview fed by the same index JSON the site publishes.
+- Record pages surface inline download controls, a client-side citation copy helper, and related title suggestions that are recomputed in the browser from the shared search index.
+
 ## Publish to GitHub Pages
 
 1. Commit your changes and push them to GitHub.

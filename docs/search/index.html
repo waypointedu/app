@@ -4,15 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Search — Waypoint Digital Library</title>
-    <meta name="description" content="Search open-access records across the Waypoint Digital Library." />
+    <meta name="description" content="Search open-access records across the Waypoint Digital Library with live filters and genre shelves." />
     <link rel="stylesheet" href="../assets/css/style.css" />
-    <script type="module" src="../assets/js/search.js"></script>
+    
   </head>
-  <body>
+  <body class="page-search">
     <header>
       <div class="container">
         <nav>
-          <h1><a href="../index.html" style="color: inherit; text-decoration: none;">Waypoint Digital Library</a></h1>
+          <h1><a href="../index.html" class="brand">Waypoint Digital Library</a></h1>
           <div class="links">
             <a href="../index.html">Home</a>
             <a href="../search/">Search</a>
@@ -24,29 +24,95 @@
     <main>
       <div class="container">
         
-      <section class="grid-two">
-        <div class="search-panel">
-          <div>
-            <label for="search-input">Keyword</label>
-            <input id="search-input" name="q" type="search" placeholder="Search by title, author, or subject" />
-          </div>
-          <div>
-            <label for="collection-select">Collection</label>
-            <select id="collection-select" name="collection">
-              <option value="">Any collection</option>
-            </select>
-          </div>
-          <div>
-            <label for="subject-select">Subject</label>
-            <select id="subject-select" name="subject">
-              <option value="">Any subject</option>
-            </select>
-          </div>
-          <p class="meta" data-total>0 records</p>
-        </div>
+      <section class="search-hero">
         <div>
-          <ul class="results-list" data-results></ul>
-          <p data-empty hidden>No records match your filters yet. Try widening your search.</p>
+          <p class="eyebrow">Deep catalogue search</p>
+          <h2>Filter 2 records in real time.</h2>
+          <p>Search by keyword, collection, subject, or genre. Active filters appear as removable chips so you can experiment.</p>
+        </div>
+      </section>
+      <section class="search-shell" data-search-root>
+        <form class="search-form" data-search-form>
+          <div class="field">
+            <label for="search-input">Keyword</label>
+            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search by title, author, or subject" data-search-input />
+          </div>
+          <div class="field-grid">
+            <label>
+              <span>Collection</span>
+              <select name="collection" data-filter-collection>
+                <option value="">Any collection</option>
+              </select>
+            </label>
+            <label>
+              <span>Subject</span>
+              <select name="subject" data-filter-subject>
+                <option value="">Any subject</option>
+              </select>
+            </label>
+            <label>
+              <span>Genre</span>
+              <select name="genre" data-filter-genre>
+                <option value="">Any genre</option>
+              </select>
+            </label>
+          </div>
+          <div class="active-filters" data-active-filters role="list" aria-live="polite"></div>
+          <div class="form-footer">
+            <button type="button" class="button ghost" data-clear>Clear filters</button>
+            <p data-total>Loading index…</p>
+          </div>
+        </form>
+        <div class="search-results">
+          <ol class="results-list" data-results></ol>
+          <p class="empty" data-empty hidden>No records match your filters yet. Try widening your search terms.</p>
+        </div>
+      </section>
+      <section class="search-shelves" data-shelf-preview>
+        <header>
+          <h3>Preview the interactive shelves</h3>
+          <p>Jump into a shelf sequence or open a record to keep exploring.</p>
+        </header>
+        <div class="shelf-preview" data-shelf-preview-grid>
+          
+          <article class="preview-group">
+            <h4>Autobiography</h4>
+            <div class="preview-track">
+              
+                    <a class="preview-card" href="../record/2025-0003/">
+                      <span class="preview-title">The Confessions</span>
+                      <span class="preview-meta">Augustine of Hippo · 1900</span>
+                    </a>
+                  
+            </div>
+          </article>
+        
+
+          <article class="preview-group">
+            <h4>Biography</h4>
+            <div class="preview-track">
+              
+                    <a class="preview-card" href="../record/2025-0003/">
+                      <span class="preview-title">The Confessions</span>
+                      <span class="preview-meta">Augustine of Hippo · 1900</span>
+                    </a>
+                  
+            </div>
+          </article>
+        
+
+          <article class="preview-group">
+            <h4>Fiction</h4>
+            <div class="preview-track">
+              
+                    <a class="preview-card" href="../record/2025-0004/">
+                      <span class="preview-title">Persuasion</span>
+                      <span class="preview-meta">Jane Austen · 1891</span>
+                    </a>
+                  
+            </div>
+          </article>
+        
         </div>
       </section>
     
@@ -57,5 +123,6 @@
         <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
       </div>
     </footer>
+    <script type="module" src="../assets/js/search.js"></script>
   </body>
 </html>

@@ -9,6 +9,13 @@
       "Patristics",
       "Autobiography"
     ],
+    "genres": [
+      "Non-Fiction",
+      "Memoir",
+      "Theology",
+      "Biography",
+      "Autobiography"
+    ],
     "collection": "Waypoint Classics",
     "year": 1900,
     "lang": "en",
@@ -23,6 +30,11 @@
     ],
     "subjects": [
       "Fiction",
+      "Romance"
+    ],
+    "genres": [
+      "Fiction",
+      "Novel",
       "Romance"
     ],
     "collection": "Waypoint Classics",
