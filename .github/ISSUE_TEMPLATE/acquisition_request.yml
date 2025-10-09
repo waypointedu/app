@@ -1,0 +1,29 @@
+name: Acquisition Request
+description: Propose a work for inclusion in the Waypoint Digital Library
+labels: ["acquisition"]
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title of work
+      placeholder: e.g. The Confessions
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source URL or identifier
+      placeholder: https://www.gutenberg.org/ebooks/3296
+    validations:
+      required: true
+  - type: textarea
+    id: rights
+    attributes:
+      label: Rights basis
+      description: Describe why the work can be distributed openly.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
