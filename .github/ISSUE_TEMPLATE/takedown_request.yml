@@ -1,0 +1,25 @@
+name: Takedown Request
+description: Request removal of a work from the Waypoint Digital Library
+labels: ["takedown"]
+body:
+  - type: input
+    id: record
+    attributes:
+      label: Record ID or URL
+      placeholder: https://example.github.io/waypoint-library/record/2025-0003
+    validations:
+      required: true
+  - type: textarea
+    id: relationship
+    attributes:
+      label: Relationship to the work
+      description: Describe your rights interest or authority.
+    validations:
+      required: true
+  - type: textarea
+    id: explanation
+    attributes:
+      label: Reason for request
+      description: Provide as much detail as possible.
+    validations:
+      required: true
