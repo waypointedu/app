@@ -1,0 +1,28 @@
+---
+import SearchLayout from '../layouts/Search.astro';
+import SearchBox from '../components/SearchBox.astro';
+import FacetsPanel from '../components/FacetsPanel.astro';
+import ResultsGrid from '../components/ResultsGrid.astro';
+import index from '../../search/index.json';
+const query = Astro.url.searchParams.get('q') ?? '';
+const results = index.filter((record) =>
+  !query ? true : record.title.toLowerCase().includes(query.toLowerCase())
+);
+---
+<SearchLayout>
+  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search</h1>
+      <p class="text-slate-600 dark:text-slate-300">Full-text and metadata search is powered by a prebuilt Fuse.js index.</p>
+    </div>
+    <div class="w-full max-w-sm">
+      <SearchBox />
+    </div>
+  </div>
+  <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <aside class="rounded-xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80">
+      <FacetsPanel />
+    </aside>
+    <ResultsGrid results={results} />
+  </div>
+</SearchLayout>

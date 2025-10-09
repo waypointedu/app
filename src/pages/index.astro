@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import ResultsGrid from '../components/ResultsGrid.astro';
+import records from '../data/new-arrivals.json';
+---
+<Base>
+  <section class="mx-auto max-w-6xl px-6 py-16">
+    <div class="grid gap-8 md:grid-cols-2 md:items-center">
+      <div class="space-y-6">
+        <p class="text-sm font-semibold uppercase tracking-widest text-primary-500">Waypoint Institute Library Editions</p>
+        <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Scholarly digital editions, fully open.</h1>
+        <p class="text-lg text-slate-600 dark:text-slate-300">
+          Waypoint Digital Library is a static-first publishing stack for enduring access to humanities texts. Explore curated collections, authoritative metadata, and high-quality EPUB and PDF outputs—all built with Astro and GitHub Actions.
+        </p>
+        <div class="flex gap-4">
+          <a href="/browse" class="rounded-full bg-primary-500 px-6 py-3 text-sm font-semibold text-white shadow">Browse Library</a>
+          <a href="/policies/collection" class="rounded-full border border-primary-500 px-6 py-3 text-sm font-semibold text-primary-600">Policies</a>
+        </div>
+      </div>
+      <div class="rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/70">
+        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">New Arrivals</h2>
+        <ResultsGrid results={records} />
+      </div>
+    </div>
+  </section>
+</Base>

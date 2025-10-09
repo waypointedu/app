@@ -1,0 +1,17 @@
+---
+const { src } = Astro.props as { src: string };
+---
+<div class="h-[70vh] w-full rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" x-data="epubReader('${src}')">
+  <div id="epub-viewer" class="h-full w-full"></div>
+</div>
+<script type="module">
+  const epubReader = (src) => ({
+    init() {
+      import('/vendors/epubjs/epub.js').then((module) => {
+        const ePub = module.default;
+        const book = ePub(src);
+        book.renderTo('epub-viewer', { spread: 'always' });
+      });
+    }
+  });
+</script>
