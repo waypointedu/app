@@ -1,0 +1,14 @@
+---
+const { metadata = {} } = Astro.props as { metadata?: Record<string, string | string[]> };
+const entries = Object.entries(metadata);
+---
+<dl class="grid gap-4 rounded-lg border border-slate-200 bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 sm:grid-cols-2">
+  {entries.map(([label, value]) => (
+    <div>
+      <dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</dt>
+      <dd class="mt-1 text-sm text-slate-700 dark:text-slate-200">
+        {Array.isArray(value) ? value.join(', ') : value}
+      </dd>
+    </div>
+  ))}
+</dl>

@@ -1,0 +1,12 @@
+[
+  {
+    "slug": "waypoint-classics",
+    "title": "Waypoint Classics",
+    "description": "Canonical texts edited for modern readers with scholarly apparatus."
+  },
+  {
+    "slug": "manuscripts",
+    "title": "Manuscripts",
+    "description": "IIIF-first folios and diplomatic transcriptions."
+  }
+]
