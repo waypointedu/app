@@ -1,38 +1,37 @@
 # Waypoint Digital Library
 
-This repository now ships as a purely static site so you can publish to GitHub Pages without any build tooling or GitHub Actions.
-All pages, search assets, and download files already live inside the `docs/` folder, so Pages can serve them directly from the `main` branch (or any branch you choose).
+This repository provides a zero-dependency static library site that you can deploy straight to GitHub Pages. Everything — the home page, search interface, record detail views, and placeholder downloads — lives in the committed `docs/` folder so Pages can publish it without running any workflows. When you update metadata, a small Node.js script rebuilds the HTML and refreshed search index for you.
 
-## What's included
+## Repository layout
 
-- `docs/` — Production-ready HTML, CSS, and JavaScript. Upload this folder to GitHub Pages.
-- `_records/` — JSON catalog records used to regenerate the search index.
-- `books/` — Source materials for your reading editions.
-- `scripts/` — Small Node.js helpers for rebuilding the search index or validating records (no dependencies required).
+- `docs/` — Generated HTML, CSS, JavaScript, and placeholder book downloads ready for GitHub Pages.
+- `_records/` — JSON catalog records. Edit these to update metadata and copy.
+- `books/` — Source folders for reading editions (cover art, markdown chapters, etc.).
+- `scripts/` — Lightweight Node helpers (`validate-records.mjs`, `build-site.mjs`) that only use the Node standard library.
 
-## Getting started
+## Local workflow
 
-You do not need to run `npm install`. Node's built-in runtime is enough for the helper scripts.
+You do not need `npm install`. Node 18+ is enough for the helper scripts.
 
 ```bash
-node scripts/validate-records.mjs
-node scripts/build-search-index.mjs
+node scripts/validate-records.mjs   # optional metadata lint
+node scripts/build-site.mjs         # regenerates docs/ and search/index.json
 ```
 
-`build-search-index.mjs` writes the catalog index to both `search/index.json` and `docs/search/index.json`, keeping the static site in sync with your record updates.
+`build-site.mjs` rebuilds every HTML page, refreshes the search index at both `search/index.json` and `docs/search/index.json`, and regenerates the record detail views under `docs/record/<id>/`.
 
-## Publishing to GitHub Pages
+## Publish to GitHub Pages
 
-1. Commit the repository and push to GitHub.
-2. In **Settings → Pages**, choose **Deploy from a branch** and select the branch containing your site (for example `main`).
+1. Commit your changes and push them to GitHub.
+2. In **Settings → Pages**, choose **Deploy from a branch** and select the branch that contains the site (for example `main`).
 3. Set the folder to `/docs` and save.
-4. GitHub Pages will serve the static files exactly as committed. Whenever you edit records or pages, rerun `node scripts/build-search-index.mjs`, commit the changes under `docs/`, and push again.
+4. GitHub Pages will serve the files exactly as committed. Whenever you edit records, run `node scripts/build-site.mjs`, commit the regenerated `docs/` outputs, and push again.
 
 ## Updating content
 
-- Edit existing records by updating the JSON files in `_records/` and rerun the build script.
+- Edit catalog records in `_records/`, then rerun `node scripts/build-site.mjs` to rebuild the site.
 - Replace the placeholder book files under `docs/books/<slug>/` with your actual HTML/EPUB/PDF outputs.
-- Update or add static pages directly within `docs/` — they are plain HTML files with lightweight CSS.
+- Adjust site styling or layout by editing the assets in `docs/assets/`.
 
 ## License
 

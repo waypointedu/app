@@ -1,67 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-base-path="">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Waypoint Digital Library</title>
-    <link rel="stylesheet" href="./assets/css/style.css" />
+    <meta name="description" content="A pre-built static library site with dependable metadata and multi-format downloads." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    
   </head>
   <body>
     <header>
-      <div class="grid" style="gap: 0.5rem;">
-        <strong>Waypoint Digital Library</strong>
+      <div class="container">
         <nav>
-          <a href="./index.html">Home</a>
-          <a href="./search/index.html">Search</a>
-          <a href="./collections.html">Collections</a>
-          <a href="./policies.html">Policies</a>
+          <h1><a href="index.html" style="color: inherit; text-decoration: none;">Waypoint Digital Library</a></h1>
+          <div class="links">
+            <a href="index.html">Home</a>
+            <a href="search/">Search</a>
+            <a href="policies.html">Policies</a>
+          </div>
         </nav>
       </div>
     </header>
     <main>
-      <section class="hero">
-        <h1>University-caliber collections, no servers required.</h1>
-        <p>
-          Waypoint is a static-first digital library that you can host entirely on GitHub Pages.
-          Browse high quality, public-domain texts, explore curated collections, and download ready-to-read editions without a complex backend.
-        </p>
-        <div class="downloads">
-          <a class="button" href="./search/index.html">Start searching</a>
-          <a class="button secondary" href="https://github.com/your-org/waypoint-digital-library" target="_blank" rel="noopener">View on GitHub</a>
-        </div>
-      </section>
+      <div class="container">
+        
+    <section class="hero">
+      <div>
+        <h2>Scholarly editions, ready for the web.</h2>
+        <p>Waypoint Digital Library curates open-access texts with reliable metadata, downloadable formats, and clean reading experiences. Everything you see here is generated ahead of time and committed directly to this repository.</p>
+      </div>
+      <div class="notice">Browse recent arrivals below or jump straight to the <a href="search/">search interface</a> to filter by subject, collection, or year.</div>
+    </section>
+  
+    <section>
+      <h2>Latest additions</h2>
+      <div class="cards">
+        
+        <article class="card">
+          <h3><a href="record/2025-0003/">The Confessions</a></h3>
+          <p>Augustine of Hippo · 1900</p>
+          <p class="meta"><span>Patristics</span> <span>Autobiography</span></p>
+          <a class="badge" href="record/2025-0003/">View record</a>
+        </article>
+      
 
-      <section>
-        <h2>New arrivals</h2>
-        <div class="grid cards">
-          <article class="card">
-            <span class="badge">A-grade edition</span>
-            <h3><a href="./record/2025-0004/index.html">Persuasion</a></h3>
-            <p>Jane Austen &middot; 1891</p>
-            <p>Anne Elliot navigates loyalty, class, and second chances in Austen's mature novel of persuasion.</p>
-          </article>
-          <article class="card">
-            <span class="badge">A-grade edition</span>
-            <h3><a href="./record/2025-0003/index.html">The Confessions</a></h3>
-            <p>Augustine of Hippo &middot; 1900</p>
-            <p>Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.</p>
-          </article>
-        </div>
-      </section>
-
-      <section>
-        <h2>Featured collections</h2>
-        <div class="grid cards">
-          <article class="card">
-            <h3>Waypoint Classics</h3>
-            <p>Signature public-domain works edited, proofread, and packaged by the Waypoint team.</p>
-            <a class="button secondary" href="./collections.html#waypoint-classics">Explore the collection</a>
-          </article>
-        </div>
-      </section>
+        <article class="card">
+          <h3><a href="record/2025-0004/">Persuasion</a></h3>
+          <p>Jane Austen · 1891</p>
+          <p class="meta"><span>Fiction</span> <span>Romance</span></p>
+          <a class="badge" href="record/2025-0004/">View record</a>
+        </article>
+      
+      </div>
+    </section>
+  
+      </div>
     </main>
     <footer>
-      &copy; 2025 Waypoint Institute Library Editions. Hosted on GitHub Pages.
+      <div class="container">
+        <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
+      </div>
     </footer>
   </body>
 </html>

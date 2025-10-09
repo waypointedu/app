@@ -1,21 +1,5 @@
 [
   {
-    "id": "2025-0004",
-    "title": "Persuasion",
-    "creators": [
-      "Jane Austen"
-    ],
-    "subjects": [
-      "Fiction",
-      "Romance"
-    ],
-    "collection": "Waypoint Classics",
-    "year": 1891,
-    "lang": "en",
-    "quality": "A",
-    "permalink": "/record/2025-0004"
-  },
-  {
     "id": "2025-0003",
     "title": "The Confessions",
     "creators": [
@@ -29,6 +13,22 @@
     "year": 1900,
     "lang": "en",
     "quality": "A",
-    "permalink": "/record/2025-0003"
+    "permalink": "record/2025-0003/"
+  },
+  {
+    "id": "2025-0004",
+    "title": "Persuasion",
+    "creators": [
+      "Jane Austen"
+    ],
+    "subjects": [
+      "Fiction",
+      "Romance"
+    ],
+    "collection": "Waypoint Classics",
+    "year": 1891,
+    "lang": "en",
+    "quality": "A",
+    "permalink": "record/2025-0004/"
   }
 ]

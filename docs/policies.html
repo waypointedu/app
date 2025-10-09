@@ -1,40 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-base-path="">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Policies · Waypoint Digital Library</title>
-    <link rel="stylesheet" href="./assets/css/style.css" />
+    <title>Policies — Waypoint Digital Library</title>
+    <meta name="description" content="Rights, preservation, and acquisition policies for the Waypoint Digital Library." />
+    <link rel="stylesheet" href="assets/css/style.css" />
+    
   </head>
   <body>
     <header>
-      <div class="grid" style="gap: 0.5rem;">
-        <strong>Waypoint Digital Library</strong>
+      <div class="container">
         <nav>
-          <a href="./index.html">Home</a>
-          <a href="./search/index.html">Search</a>
-          <a href="./collections.html">Collections</a>
-          <a href="./policies.html">Policies</a>
+          <h1><a href="index.html" style="color: inherit; text-decoration: none;">Waypoint Digital Library</a></h1>
+          <div class="links">
+            <a href="index.html">Home</a>
+            <a href="search/">Search</a>
+            <a href="policies.html">Policies</a>
+          </div>
         </nav>
       </div>
     </header>
     <main>
-      <h1>Policies</h1>
-      <section class="card" style="margin-top: 2rem;">
-        <h2>Collection Development</h2>
-        <p>Waypoint acquires public-domain and openly licensed works that align with our mission to provide dependable scholarly editions.</p>
+      <div class="container">
+        
+      <section class="hero">
+        <div>
+          <h2>Collection development &amp; rights</h2>
+          <p>We focus on public-domain and openly licensed texts suitable for research and teaching. Every item is vetted for provenance, rights status, and editorial quality before publication.</p>
+        </div>
       </section>
-      <section class="card" style="margin-top: 1.5rem;">
-        <h2>Rights &amp; Takedown</h2>
-        <p>If you believe a work has been posted in error, please email <a href="mailto:takedown@waypoint.example">takedown@waypoint.example</a> with the record ID and supporting documentation.</p>
+      <section>
+        <h3>Acquisition principles</h3>
+        <ul>
+          <li>Preference for texts with established scholarly value or instructional demand.</li>
+          <li>Source materials must be public domain or released under an open license compatible with redistribution.</li>
+          <li>Digital assets over 25&nbsp;MB are mirrored to long-term repositories such as Zenodo or the Internet Archive.</li>
+        </ul>
+        <h3>Editorial guarantees</h3>
+        <ul>
+          <li>Each edition is proofed and assigned a quality grade (A–C).</li>
+          <li>Downloads include EPUB, PDF, and an accessible HTML reading view.</li>
+          <li>Metadata is checked for completeness and accuracy prior to deployment.</li>
+        </ul>
+        <h3>Takedowns</h3>
+        <p>To request a takedown or raise a rights concern, open an issue using the <em>Takedown request</em> template or email <a href="mailto:library@waypoint.example">library@waypoint.example</a>. We respond within five business days.</p>
       </section>
-      <section class="card" style="margin-top: 1.5rem;">
-        <h2>Preservation</h2>
-        <p>All downloadable files are mirrored to trusted repositories to ensure long-term availability and integrity.</p>
-      </section>
+    
+      </div>
     </main>
     <footer>
-      &copy; 2025 Waypoint Institute Library Editions. Hosted on GitHub Pages.
+      <div class="container">
+        <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
+      </div>
     </footer>
   </body>
 </html>

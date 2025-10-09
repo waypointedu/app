@@ -1,39 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-base-path="../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Search · Waypoint Digital Library</title>
+    <title>Search — Waypoint Digital Library</title>
+    <meta name="description" content="Search open-access records across the Waypoint Digital Library." />
     <link rel="stylesheet" href="../assets/css/style.css" />
+    <script type="module" src="../assets/js/search.js"></script>
   </head>
   <body>
     <header>
-      <div class="grid" style="gap: 0.5rem;">
-        <strong>Waypoint Digital Library</strong>
+      <div class="container">
         <nav>
-          <a href="../index.html">Home</a>
-          <a href="./index.html">Search</a>
-          <a href="../collections.html">Collections</a>
-          <a href="../policies.html">Policies</a>
+          <h1><a href="../index.html" style="color: inherit; text-decoration: none;">Waypoint Digital Library</a></h1>
+          <div class="links">
+            <a href="../index.html">Home</a>
+            <a href="../search/">Search</a>
+            <a href="../policies.html">Policies</a>
+          </div>
         </nav>
       </div>
     </header>
     <main>
-      <h1>Search the library</h1>
-      <p>Search across every record in the catalog and refine with simple filters. All data is loaded from static JSON files so the experience works on GitHub Pages without a build server.</p>
-
-      <div class="search-bar">
-        <input id="searchQuery" type="search" placeholder="Search for titles, creators, or subjects" autocomplete="off" />
-        <button id="resetButton" type="button" class="secondary">Clear</button>
+      <div class="container">
+        
+      <section class="grid-two">
+        <div class="search-panel">
+          <div>
+            <label for="search-input">Keyword</label>
+            <input id="search-input" name="q" type="search" placeholder="Search by title, author, or subject" />
+          </div>
+          <div>
+            <label for="collection-select">Collection</label>
+            <select id="collection-select" name="collection">
+              <option value="">Any collection</option>
+            </select>
+          </div>
+          <div>
+            <label for="subject-select">Subject</label>
+            <select id="subject-select" name="subject">
+              <option value="">Any subject</option>
+            </select>
+          </div>
+          <p class="meta" data-total>0 records</p>
+        </div>
+        <div>
+          <ul class="results-list" data-results></ul>
+          <p data-empty hidden>No records match your filters yet. Try widening your search.</p>
+        </div>
+      </section>
+    
       </div>
-
-      <div id="facets" class="facets"></div>
-      <div id="results" class="grid cards"></div>
-      <p id="emptyState" class="alert" style="display:none;">No results matched your filters. Try clearing the filters or adjusting your search.</p>
     </main>
     <footer>
-      &copy; 2025 Waypoint Institute Library Editions. Hosted on GitHub Pages.
+      <div class="container">
+        <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
+      </div>
     </footer>
-    <script src="../assets/js/app.js" type="module"></script>
   </body>
 </html>
