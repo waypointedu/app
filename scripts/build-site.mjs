@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import { join, extname } from 'node:path';
+import { join, extname, dirname } from 'node:path';
 
 const root = process.cwd();
 const docsDir = join(root, 'docs');
@@ -10,6 +10,31 @@ await Promise.all([
   fs.writeFile(join(docsDir, '.nojekyll'), ''),
   fs.writeFile(join(root, '.nojekyll'), ''),
 ]);
+
+function redirectMarkup(target, message = 'Redirecting…') {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="0; url=${target}" />
+    <link rel="canonical" href="${target}" />
+    <title>${message}</title>
+    <style>
+      body { font-family: system-ui, sans-serif; line-height: 1.5; padding: 3rem; text-align: center; }
+      a { color: #0f4c81; }
+    </style>
+  </head>
+  <body>
+    <p>${message} If you are not redirected automatically, <a href="${target}">continue to ${target}</a>.</p>
+  </body>
+</html>`;
+}
+
+async function writeRedirect(relativePath, target, message) {
+  const destination = join(root, relativePath);
+  await fs.mkdir(dirname(destination), { recursive: true });
+  await fs.writeFile(destination, redirectMarkup(target, message));
+}
 
 function normalizePermalink(input, recordId) {
   if (!input) return `record/${recordId}/`;
@@ -306,6 +331,24 @@ function buildSearchIndex(records) {
   // Policies page
   const policiesHtml = renderPoliciesPage();
   await fs.writeFile(join(docsDir, 'policies.html'), policiesHtml);
+
+  // Root-level redirects so repositories configured to publish from the root still resolve correctly.
+  await Promise.all([
+    writeRedirect('index.html', 'docs/index.html', 'Redirecting to the Waypoint Digital Library'),
+    writeRedirect('policies.html', 'docs/policies.html', 'Redirecting to policies'),
+    writeRedirect('search/index.html', '../docs/search/', 'Redirecting to search'),
+    writeRedirect('404.html', 'docs/index.html', 'Page not found — redirecting to the library home'),
+  ]);
+
+  await Promise.all(
+    records.map((record) =>
+      writeRedirect(
+        join('record', record.record_id, 'index.html'),
+        `docs/record/${record.record_id}/`,
+        `Redirecting to ${record.title}`,
+      ),
+    ),
+  );
 
   console.log(`Built site with ${records.length} record${records.length === 1 ? '' : 's'}.`);
 })();
