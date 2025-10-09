@@ -34,6 +34,26 @@ npm install
 npm run dev
 ```
 
+## Deployment to GitHub Pages
+
+The repository ships with a GitHub Actions workflow (`.github/workflows/build.yml`) that
+builds the Astro site, packages the contents of `dist/`, and publishes the artifact to
+GitHub Pages. To activate automatic deploys:
+
+1. Push the project to GitHub and open **Settings → Pages**.
+2. Under **Build and deployment**, choose **Source → GitHub Actions** (you do not need to
+   select a branch).
+3. Commit to the default branch (e.g., `main`). Every push triggers the workflow which
+   runs the build and then calls `actions/deploy-pages` to publish the site.
+4. Watch the workflow run under **Actions → Build and Deploy**. Once the `deploy` job
+   finishes, the run summary shows the live Pages URL.
+
+For test deploys from a feature branch, run the workflow manually by opening the latest
+successful build job and selecting **Run workflow** (or merge the branch into `main` to
+publish automatically). If a deployment seems stuck, confirm that the most recent
+workflow completed successfully—Pages will only publish artifacts produced by the
+Actions pipeline.
+
 ## License
 
 Released under the MIT License. See `LICENSE` for details.
