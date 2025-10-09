@@ -1,58 +1,38 @@
 # Waypoint Digital Library
 
-Waypoint Digital Library is a static-first reference implementation of a university-caliber digital library that can run entirely on GitHub Pages. The project pairs Astro, Tailwind CSS, and lightweight Alpine.js islands with a manual publishing workflow so you remain in full control of when builds run.
+This repository now ships as a purely static site so you can publish to GitHub Pages without any build tooling or GitHub Actions.
+All pages, search assets, and download files already live inside the `docs/` folder, so Pages can serve them directly from the `main` branch (or any branch you choose).
 
-## Features
+## What's included
 
-- **Astro + Tailwind UI:** Component-driven site shell with dark mode, responsive layouts, and reusable design primitives.
-- **Record-driven architecture:** Catalog metadata is stored in `_records/` Markdown files with YAML front matter, while long-form works live in `books/<slug>/` folders.
-- **Client-side discovery:** A prebuilt `/search/index.json` is queried with Fuse.js for search and filtering experiences.
-- **Readers:** Inline PDF previews, EPUB reader shell, and placeholders for IIIF Mirador integration.
-- **Local tooling:** Scripts in `scripts/` rebuild the search index and validate metadata before you commit updates.
+- `docs/` — Production-ready HTML, CSS, and JavaScript. Upload this folder to GitHub Pages.
+- `_records/` — JSON catalog records used to regenerate the search index.
+- `books/` — Source materials for your reading editions.
+- `scripts/` — Small Node.js helpers for rebuilding the search index or validating records (no dependencies required).
 
-## Repository Layout
+## Getting started
 
-```
-src/
-  components/      UI primitives such as RecordCard, MetadataTable, DownloadButtons
-  layouts/         Base shells for records, search, policies, and reading views
-  pages/           Astro routes for home, search, browse, record, and policies
-  styles/          Tailwind base styles and long-form reading CSS
-  data/            Controlled vocabularies and site settings
-  lib/             Client helpers (search, facets, schema generators)
-books/             Source Markdown for reading editions + book.yml metadata
-_records/          Catalog metadata records with descriptive abstracts
-search/index.json  Prebuilt search index (generated locally)
-scripts/           Node utilities for indexing and validation
-.github/           Issue templates and PR checklist
-```
-
-## Local Development
+You do not need to run `npm install`. Node's built-in runtime is enough for the helper scripts.
 
 ```bash
-npm install
-npm run dev
-```
-
-Run the helper scripts whenever you change records or book metadata:
-
-```bash
-node scripts/build-search-index.mjs
 node scripts/validate-records.mjs
+node scripts/build-search-index.mjs
 ```
 
-## Manual Deployment to GitHub Pages
+`build-search-index.mjs` writes the catalog index to both `search/index.json` and `docs/search/index.json`, keeping the static site in sync with your record updates.
 
-Automated workflows have been removed so deploys happen only when you decide to publish. To ship a new version of the site:
+## Publishing to GitHub Pages
 
-1. Build the project locally. The Astro output is configured to write into the `docs/` folder so GitHub Pages can serve it directly.
-   ```bash
-   npm install
-   npm run build
-   ```
-2. Commit the updated `docs/` directory along with any source changes and push to your repository.
-3. In GitHub, open **Settings → Pages**. Under **Build and deployment**, choose **Source → Deploy from a branch**, select your publishing branch (for example `main`), and set the folder to `/docs`.
-4. GitHub Pages will publish the contents of `docs/` straight from the branch. Repeat the build and commit process whenever you need to deploy updates.
+1. Commit the repository and push to GitHub.
+2. In **Settings → Pages**, choose **Deploy from a branch** and select the branch containing your site (for example `main`).
+3. Set the folder to `/docs` and save.
+4. GitHub Pages will serve the static files exactly as committed. Whenever you edit records or pages, rerun `node scripts/build-search-index.mjs`, commit the changes under `docs/`, and push again.
+
+## Updating content
+
+- Edit existing records by updating the JSON files in `_records/` and rerun the build script.
+- Replace the placeholder book files under `docs/books/<slug>/` with your actual HTML/EPUB/PDF outputs.
+- Update or add static pages directly within `docs/` — they are plain HTML files with lightweight CSS.
 
 ## License
 

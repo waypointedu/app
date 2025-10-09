@@ -1,0 +1,29 @@
+{
+  "record_id": "2025-0004",
+  "title": "Persuasion",
+  "creators": ["Jane Austen"],
+  "contributors": [],
+  "date": 1891,
+  "type": "text",
+  "language": "en",
+  "rights": "Public Domain",
+  "subjects": ["Fiction", "Romance"],
+  "collection": "Waypoint Classics",
+  "identifiers": {
+    "permalink": "/record/2025-0004"
+  },
+  "downloads": {
+    "html": "books/persuasion-austen/index.html",
+    "epub": "books/persuasion-austen/book.epub",
+    "pdf": "books/persuasion-austen/book.pdf"
+  },
+  "source_url": "https://www.gutenberg.org/ebooks/105",
+  "quality_grade": "A",
+  "iiif_manifest": null,
+  "citation": {
+    "apa": "Austen, J. (1891). Persuasion. Waypoint Institute Library Editions.",
+    "chicago": "Austen, Jane. Persuasion. Waypoint Institute Library Editions, 1891.",
+    "mla": "Austen, Jane. Persuasion. Waypoint Institute Library Editions, 1891."
+  },
+  "abstract": "Anne Elliot navigates loyalty, class, and second chances in Austen's mature novel of persuasion."
+}

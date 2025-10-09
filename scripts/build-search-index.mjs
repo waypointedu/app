@@ -1,16 +1,14 @@
 import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
-import matter from 'gray-matter';
+import { join, extname } from 'node:path';
 
 const recordsDir = join(process.cwd(), '_records');
 const files = await fs.readdir(recordsDir);
 const entries = [];
 
 for (const file of files) {
-  if (!file.endsWith('.md')) continue;
+  if (extname(file) !== '.json') continue;
   const filepath = join(recordsDir, file);
-  const content = await fs.readFile(filepath, 'utf8');
-  const { data } = matter(content);
+  const data = JSON.parse(await fs.readFile(filepath, 'utf8'));
   entries.push({
     id: data.record_id,
     title: data.title,
@@ -24,6 +22,12 @@ for (const file of files) {
   });
 }
 
+entries.sort((a, b) => a.title.localeCompare(b.title));
+
 const indexPath = join(process.cwd(), 'search', 'index.json');
-await fs.writeFile(indexPath, JSON.stringify(entries, null, 2));
-console.log(`Wrote ${entries.length} records to ${indexPath}`);
+const docsIndexPath = join(process.cwd(), 'docs', 'search', 'index.json');
+const payload = JSON.stringify(entries, null, 2) + '\n';
+await fs.writeFile(indexPath, payload);
+await fs.mkdir(join(process.cwd(), 'docs', 'search'), { recursive: true });
+await fs.writeFile(docsIndexPath, payload);
+console.log(`Wrote ${entries.length} records to ${indexPath} and ${docsIndexPath}`);
