@@ -1,0 +1,13 @@
+---
+import RecordCard from './RecordCard.astro';
+const { results = [] } = Astro.props as { results?: any[] };
+---
+<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  {results.length === 0 ? (
+    <p class="col-span-full rounded-lg border border-dashed border-slate-300 bg-white/80 p-8 text-center text-sm text-slate-500">
+      No results found. Adjust filters or search terms.
+    </p>
+  ) : (
+    results.map((record) => <RecordCard {...record} />)
+  )}
+</div>

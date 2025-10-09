@@ -1,0 +1,25 @@
+---
+const { downloads = {} } = Astro.props as { downloads?: Record<string, string | null> };
+const items = [
+  { key: 'html', label: 'Read Online' },
+  { key: 'epub', label: 'Download EPUB' },
+  { key: 'pdf', label: 'Download PDF' }
+];
+---
+<div class="flex flex-wrap gap-3">
+  {items.map((item) => {
+    const href = downloads[item.key];
+    return href ? (
+      <a
+        href={href}
+        class="inline-flex items-center gap-2 rounded-full bg-primary-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary-600"
+      >
+        {item.label}
+      </a>
+    ) : (
+      <span class="inline-flex items-center gap-2 rounded-full border border-dashed border-slate-300 px-4 py-2 text-sm text-slate-400">
+        {item.label}
+      </span>
+    );
+  })}
+</div>
