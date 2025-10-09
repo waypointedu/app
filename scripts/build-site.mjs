@@ -6,6 +6,7 @@ const docsDir = join(root, 'docs');
 const recordsDir = join(root, '_records');
 
 await fs.mkdir(docsDir, { recursive: true });
+await fs.writeFile(join(docsDir, '.nojekyll'), '');
 
 function normalizePermalink(input, recordId) {
   if (!input) return `record/${recordId}/`;

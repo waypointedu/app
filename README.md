@@ -24,8 +24,8 @@ node scripts/build-site.mjs         # regenerates docs/ and search/index.json
 
 1. Commit your changes and push them to GitHub.
 2. In **Settings → Pages**, choose **Deploy from a branch** and select the branch that contains the site (for example `main`).
-3. Set the folder to `/docs` and save.
-4. GitHub Pages will serve the files exactly as committed. Whenever you edit records, run `node scripts/build-site.mjs`, commit the regenerated `docs/` outputs, and push again.
+3. Set the folder to `/docs` and save. The generator drops a `.nojekyll` file into `docs/` so GitHub Pages skips the default Jekyll build step.
+4. GitHub Pages will serve the files exactly as committed. Whenever you edit records, run `node scripts/build-site.mjs`, commit the regenerated `docs/` outputs (including `.nojekyll`), and push again.
 
 ## Updating content
 
