@@ -1,0 +1,16 @@
+---
+import SearchLayout from '../layouts/Search.astro';
+import FacetsPanel from '../components/FacetsPanel.astro';
+import ResultsGrid from '../components/ResultsGrid.astro';
+import records from '../data/new-arrivals.json';
+---
+<SearchLayout>
+  <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Browse the collection</h1>
+  <p class="text-slate-600 dark:text-slate-300">Use filters to explore digital editions across disciplines and eras.</p>
+  <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <aside class="rounded-xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80">
+      <FacetsPanel />
+    </aside>
+    <ResultsGrid results={records} />
+  </div>
+</SearchLayout>
