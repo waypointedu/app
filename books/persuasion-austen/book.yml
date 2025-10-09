@@ -1,0 +1,37 @@
+id: "2025-0004"
+slug: "persuasion-austen"
+title: "Persuasion"
+creator:
+  - family: Austen
+    given: Jane
+edition_note: "Waypoint Library Edition"
+date: 1891
+original_date: 1817
+language: "en"
+publisher: "Waypoint Institute Library Editions"
+rights: "Public Domain"
+subjects: ["Fiction", "Romance"]
+collection: "Waypoint Classics"
+description: >-
+  A new typesetting of Austen's final completed novel with refreshed typography for digital reading.
+source:
+  provenance: "Project Gutenberg eBook #105"
+  url: "https://www.gutenberg.org/ebooks/105"
+files:
+  cover: "assets/cover.jpg"
+reading:
+  split_chapters: false
+quality_grade: "A"
+record:
+  permalink: "/record/2025-0004/"
+citation:
+  csl_json:
+    type: book
+    title: "Persuasion"
+    author:
+      - family: Austen
+        given: Jane
+    issued:
+      date-parts:
+        - [1891]
+    publisher: "Waypoint Institute Library Editions"

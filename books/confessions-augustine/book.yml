@@ -1,0 +1,44 @@
+id: "2025-0003"
+slug: "confessions-augustine"
+title: "The Confessions"
+creator:
+  - family: Augustine
+    given: "of Hippo"
+contributors:
+  - role: translator
+    family: Pusey
+    given: "E. B."
+edition_note: "Waypoint Library Edition; lightly modernized spelling"
+date: 1900
+original_date: "397-400"
+language: "en"
+publisher: "Waypoint Institute Library Editions"
+rights: "Public Domain"
+subjects: ["Patristics", "Autobiography", "Theology"]
+collection: "Waypoint Classics"
+description: >-
+  A retypeset, lightly modernized public-domain translation prepared for scholarly reading.
+source:
+  provenance: "Project Gutenberg eBook #3296"
+  url: "https://www.gutenberg.org/ebooks/3296"
+files:
+  cover: "assets/cover.jpg"
+reading:
+  split_chapters: true
+quality_grade: "A"
+record:
+  permalink: "/record/2025-0003/"
+citation:
+  csl_json:
+    type: book
+    title: "The Confessions"
+    author:
+      - family: Augustine
+        given: "of Hippo"
+    translator:
+      - family: Pusey
+        given: "E. B."
+    issued:
+      date-parts:
+        - [1900]
+    publisher: "Waypoint Institute Library Editions"
