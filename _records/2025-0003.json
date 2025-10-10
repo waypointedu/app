@@ -1,0 +1,32 @@
+{
+  "record_id": "2025-0003",
+  "title": "The Confessions",
+  "creators": ["Augustine of Hippo"],
+  "contributors": [
+    { "role": "translator", "name": "E. B. Pusey" }
+  ],
+  "date": 1900,
+  "type": "text",
+  "language": "en",
+  "rights": "Public Domain",
+  "subjects": ["Patristics", "Autobiography"],
+  "genres": ["Non-Fiction", "Memoir", "Theology"],
+  "collection": "Waypoint Classics",
+  "identifiers": {
+    "permalink": "/record/2025-0003"
+  },
+  "downloads": {
+    "html": "books/confessions-augustine/index.html",
+    "epub": "books/confessions-augustine/book.epub",
+    "pdf": "books/confessions-augustine/book.pdf"
+  },
+  "source_url": "https://www.gutenberg.org/ebooks/3296",
+  "quality_grade": "A",
+  "iiif_manifest": null,
+  "citation": {
+    "apa": "Augustine of Hippo. (1900). The Confessions. Waypoint Institute Library Editions.",
+    "chicago": "Augustine of Hippo. The Confessions. Waypoint Institute Library Editions, 1900.",
+    "mla": "Augustine of Hippo. The Confessions. Waypoint Institute Library Editions, 1900."
+  },
+  "abstract": "Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography."
+}
