@@ -29,9 +29,14 @@
           <p class="eyebrow">Quality grade A</p>
           <h2>The Confessions</h2>
           <p class="meta">Augustine of Hippo · E. B. Pusey (translator) · 1900</p>
-          <div class="downloads"><a class="button" data-download="html" href="../../books/confessions-augustine/index.html">Read online</a>
+          <div class="record-actions">
+            <div class="record-actions__primary"><button type="button" class="button primary" data-open-reader data-reader-src="books/confessions-augustine/index.html">Open reading room</button></div>
+            <div class="record-actions__downloads" aria-label="Download options">
+              <div class="download-buttons"><a class="button" data-download="html" href="../../books/confessions-augustine/index.html">Read online</a>
 <a class="button" data-download="epub" href="../../books/confessions-augustine/book.epub">Download EPUB</a>
 <a class="button" data-download="pdf" href="../../books/confessions-augustine/book.pdf">Download PDF</a></div>
+            </div>
+          </div>
           <p class="meta meta--tags"><span>Patristics</span> <span>Autobiography</span></p>
           <p>Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.</p>
         </div>
@@ -68,15 +73,52 @@
         <h3>More to explore</h3>
         <div class="related-grid" data-related-list>
           
-    <article class="card card--compact" data-record-id="2025-0004">
-      <h3><a href="../../record/2025-0004/">Persuasion</a></h3>
-      <p class="meta">Jane Austen · 1891</p>
-      <p class="meta meta--tags"><span>Fiction</span> <span>Romance</span></p>
-      <a class="badge" href="../../record/2025-0004/">View record</a>
+    <article class="book-card book-card--compact" data-record-id="2025-0004">
+      <a class="book-card__link" href="../../record/2025-0004/">
+        <span class="book-card__spine" aria-hidden="true">
+          <span class="book-card__spine-title">Persuasion</span>
+          <span class="book-card__spine-author">Jane Austen</span>
+        </span>
+        <span class="book-card__cover">
+          <span class="book-card__title">Persuasion</span>
+          <span class="book-card__meta">Jane Austen · 1891</span>
+          <span class="book-card__tags"><span class="book-card__tag">Fiction</span><span class="book-card__tag">Romance</span></span>
+        </span>
+      </a>
+      
     </article>
   
         </div>
       </section>
+      
+      <div class="reading-room" data-reading-room data-reader-theme="day" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="reader-heading-2025-0003">
+        <div class="reading-room__backdrop" data-reader-close></div>
+        <div class="reading-room__panel" role="document" data-reading-panel tabindex="-1">
+          <header class="reading-room__toolbar">
+            <div class="reading-room__titles">
+              <h3 id="reader-heading-2025-0003">Immersive reader</h3>
+              <p>Adjust lighting, typography, and focus without leaving the stacks.</p>
+            </div>
+            <button type="button" class="reading-room__close" data-reader-close aria-label="Close reading room">&times;</button>
+          </header>
+          <div class="reading-room__controls">
+            <div class="reading-room__themes" role="group" aria-label="Reader theme">
+              <button type="button" class="is-active" data-reader-theme="day">Daylight</button>
+              <button type="button" data-reader-theme="sepia">Sepia</button>
+              <button type="button" data-reader-theme="night">Midnight</button>
+            </div>
+            <label class="reading-room__scale">
+              Text size
+              <input type="range" min="-2" max="2" value="0" step="1" data-reader-size />
+            </label>
+          </div>
+          <p class="reading-room__status" data-reading-status aria-live="polite"></p>
+          <article class="reading-room__content" data-reading-content tabindex="0">
+            <p>Preparing the reading room…</p>
+          </article>
+        </div>
+      </div>
+    
     
       </div>
     </main>

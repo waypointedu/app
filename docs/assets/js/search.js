@@ -203,6 +203,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, '&#39;');
   }
 
+  function renderResultCard(record, query) {
+    const link = resolveUrl(record.permalink);
+    const creators = Array.isArray(record.creators) ? record.creators.join(', ') : '';
+    const meta = [creators || null, record.year || null].filter(Boolean).join(' · ');
+    const tagsSource = record.subjects && record.subjects.length ? record.subjects : record.genres || [];
+    const highlightedTitle = highlight(escapeHtml(record.title), query);
+    const highlightedMeta = meta ? highlight(escapeHtml(meta), query) : '';
+    const highlightedSpineAuthor = creators ? highlight(escapeHtml(creators), query) : '';
+    const highlightedTags = tagsSource
+      .slice(0, 4)
+      .map((tag) => `<span class="book-card__tag">${highlight(escapeHtml(tag), query)}</span>`)
+      .join('');
+
+    return `
+      <li class="result-item">
+        <article class="book-card">
+          <a class="book-card__link" href="${link}">
+            <span class="book-card__spine" aria-hidden="true">
+              <span class="book-card__spine-title">${highlightedTitle}</span>
+              ${highlightedSpineAuthor ? `<span class="book-card__spine-author">${highlightedSpineAuthor}</span>` : ''}
+            </span>
+            <span class="book-card__cover">
+              <span class="book-card__title">${highlightedTitle}</span>
+              ${highlightedMeta ? `<span class="book-card__meta">${highlightedMeta}</span>` : ''}
+              ${highlightedTags ? `<span class="book-card__tags">${highlightedTags}</span>` : ''}
+            </span>
+          </a>
+          <a class="book-card__cta" href="${link}">Open record</a>
+        </article>
+      </li>
+    `;
+  }
+
   function renderResults(items) {
     if (!items.length) {
       resultsEl.innerHTML = '';
@@ -212,34 +245,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     emptyEl.hidden = true;
 
-    resultsEl.innerHTML = items
-      .map((record) => {
-        const meta = formatMeta(record);
-        const query = state.query;
-        const title = highlight(escapeHtml(record.title), query);
-        const metaHtml = meta ? `<p>${highlight(escapeHtml(meta), query)}</p>` : '';
-        const subjects = (record.subjects || [])
-          .slice(0, 3)
-          .map((subject) => `<span>${highlight(escapeHtml(subject), query)}</span>`)
-          .join(' ');
-        const genres = (record.genres || [])
-          .slice(0, 2)
-          .map((genre) => `<span class="genre">${highlight(escapeHtml(genre), query)}</span>`)
-          .join(' ');
-
-        return `
-          <li class="result-item">
-            <div>
-              <h3><a href="${resolveUrl(record.permalink)}">${title}</a></h3>
-              ${metaHtml}
-              ${subjects ? `<p class="meta">${subjects}</p>` : ''}
-              ${genres ? `<p class="meta meta--genres">${genres}</p>` : ''}
-            </div>
-            <a class="badge" href="${resolveUrl(record.permalink)}">Open record</a>
-          </li>
-        `;
-      })
-      .join('');
+    const query = state.query;
+    resultsEl.innerHTML = items.map((record) => renderResultCard(record, query)).join('');
   }
 
   function updateShelfPreview(items) {

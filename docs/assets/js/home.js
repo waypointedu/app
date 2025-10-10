@@ -10,6 +10,36 @@ function safeParse(value, fallback) {
   }
 }
 
+function createBookCard(record, { compact = false, showCta = false } = {}) {
+  const classes = ['book-card'];
+  if (compact) classes.push('book-card--compact');
+  const creators = Array.isArray(record.creators) ? record.creators.join(', ') : '';
+  const meta = [creators || null, record.year || null].filter(Boolean).join(' · ');
+  const topics = (record.subjects && record.subjects.length ? record.subjects : record.genres) || [];
+  const tags = topics
+    .slice(0, compact ? 2 : 4)
+    .map((subject) => `<span class="book-card__tag">${escapeHtml(subject)}</span>`)
+    .join('');
+  const link = record.permalink || '#';
+
+  return `
+    <article class="${classes.join(' ')}" data-record-id="${record.id}">
+      <a class="book-card__link" href="${escapeHtml(link)}">
+        <span class="book-card__spine" aria-hidden="true">
+          <span class="book-card__spine-title">${escapeHtml(record.title)}</span>
+          ${creators ? `<span class="book-card__spine-author">${escapeHtml(creators)}</span>` : ''}
+        </span>
+        <span class="book-card__cover">
+          <span class="book-card__title">${escapeHtml(record.title)}</span>
+          ${meta ? `<span class="book-card__meta">${escapeHtml(meta)}</span>` : ''}
+          ${tags ? `<span class="book-card__tags">${tags}</span>` : ''}
+        </span>
+      </a>
+      ${showCta ? `<a class="book-card__cta" href="${escapeHtml(link)}">Open record</a>` : ''}
+    </article>
+  `;
+}
+
 function createHeroMarkup(record) {
   if (!record) {
     return '<div class="hero-spotlight-card empty">New titles are on the way. Explore the shelves below.</div>';
@@ -21,7 +51,7 @@ function createHeroMarkup(record) {
   if (record.year) {
     meta.push(record.year);
   }
-  const subjects = (record.genres || [])
+  const subjects = ((record.subjects && record.subjects.length ? record.subjects : record.genres) || [])
     .slice(0, 3)
     .map((genre) => `<span>${escapeHtml(genre)}</span>`)
     .join('');
@@ -29,10 +59,11 @@ function createHeroMarkup(record) {
 
   return `
     <div class="hero-spotlight-card" data-hero-card data-record="${record.id}">
-      <p class="eyebrow">Spotlight edition</p>
+      <p class="eyebrow">Featured volume</p>
       <h3>${escapeHtml(record.title)}</h3>
       ${meta.length ? `<p class="meta">${escapeHtml(meta.join(' · '))}</p>` : ''}
       ${subjects ? `<p class="meta meta--tags">${subjects}</p>` : ''}
+      <div class="hero-spotlight-book">${createBookCard(record, { showCta: false })}</div>
       <a class="button" href="${permalink}">View record</a>
     </div>
   `;
@@ -145,6 +176,18 @@ function enhanceShelves() {
     });
 
     updateButtons();
+
+    if (!reduceMotion) {
+      track.addEventListener('pointermove', (event) => {
+        const rect = track.getBoundingClientRect();
+        const ratio = (event.clientX - rect.left) / rect.width;
+        const tilt = (ratio - 0.5) * 14;
+        track.style.setProperty('--shelf-tilt', `${tilt.toFixed(2)}deg`);
+      });
+      track.addEventListener('pointerleave', () => {
+        track.style.removeProperty('--shelf-tilt');
+      });
+    }
   });
 }
 
@@ -177,10 +220,54 @@ function bootstrapShelfPayload() {
   }
 }
 
+function enhanceAmbientHall() {
+  const hall = document.querySelector('[data-ambient-hall]');
+  if (!hall || reduceMotion) return;
+
+  hall.addEventListener('pointermove', (event) => {
+    const rect = hall.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width;
+    const y = (event.clientY - rect.top) / rect.height;
+    hall.style.setProperty('--pointer-x', x.toFixed(2));
+    hall.style.setProperty('--pointer-y', y.toFixed(2));
+  });
+
+  hall.addEventListener('pointerleave', () => {
+    hall.style.removeProperty('--pointer-x');
+    hall.style.removeProperty('--pointer-y');
+  });
+}
+
+function enhanceHeroGallery() {
+  const gallery = document.querySelector('[data-hero-gallery]');
+  if (!gallery) return;
+  const items = Array.from(gallery.querySelectorAll('.hero-gallery__item'));
+  if (items.length <= 1) return;
+
+  let index = 0;
+
+  function activate(newIndex) {
+    index = newIndex % items.length;
+    items.forEach((item, itemIndex) => {
+      item.classList.toggle('is-active', itemIndex === index);
+    });
+  }
+
+  activate(0);
+
+  if (!reduceMotion) {
+    setInterval(() => {
+      activate((index + 1) % items.length);
+    }, 9000);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   animateStats();
   enhanceHero();
   enhanceShelves();
   enhanceGenres();
   bootstrapShelfPayload();
+  enhanceAmbientHall();
+  enhanceHeroGallery();
 });

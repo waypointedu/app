@@ -252,25 +252,31 @@ function computeShelves(records) {
 }
 
 function renderRecordCard(record, { basePath = '', compact = false, showCta = true } = {}) {
-  const classes = ['card'];
-  if (compact) classes.push('card--compact');
-  const meta = [
-    Array.isArray(record.creators) ? record.creators.join(', ') : null,
-    record.date ?? null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-  const subjects = (record.subjects ?? [])
-    .slice(0, compact ? 2 : 3)
-    .map((subject) => `<span>${escapeHtml(subject)}</span>`)
-    .join(' ');
+  const classes = ['book-card'];
+  if (compact) classes.push('book-card--compact');
+  const creators = Array.isArray(record.creators) ? record.creators.join(', ') : '';
+  const meta = [creators || null, record.date ?? null].filter(Boolean).join(' · ');
+  const tags = (record.subjects ?? [])
+    .slice(0, compact ? 2 : 4)
+    .map((subject) => `<span class="book-card__tag">${escapeHtml(subject)}</span>`)
+    .join('');
+
+  const link = withBase(basePath, record.permalink);
 
   return `
     <article class="${classes.join(' ')}" data-record-id="${record.record_id}">
-      <h3><a href="${withBase(basePath, record.permalink)}">${escapeHtml(record.title)}</a></h3>
-      ${meta ? `<p class="meta">${escapeHtml(meta)}</p>` : ''}
-      ${subjects ? `<p class="meta meta--tags">${subjects}</p>` : ''}
-      ${showCta ? `<a class="badge" href="${withBase(basePath, record.permalink)}">View record</a>` : ''}
+      <a class="book-card__link" href="${link}">
+        <span class="book-card__spine" aria-hidden="true">
+          <span class="book-card__spine-title">${escapeHtml(record.title)}</span>
+          ${creators ? `<span class="book-card__spine-author">${escapeHtml(creators)}</span>` : ''}
+        </span>
+        <span class="book-card__cover">
+          <span class="book-card__title">${escapeHtml(record.title)}</span>
+          ${meta ? `<span class="book-card__meta">${escapeHtml(meta)}</span>` : ''}
+          ${tags ? `<span class="book-card__tags">${tags}</span>` : ''}
+        </span>
+      </a>
+      ${showCta ? `<a class="book-card__cta" href="${link}">Open record</a>` : ''}
     </article>
   `;
 }
@@ -280,7 +286,10 @@ function renderHeroSpotlight(record) {
     return `<div class="hero-spotlight-card empty">New titles are on the way. Explore the shelves below.</div>`;
   }
 
-  const genres = deriveGenres(record).slice(0, 3).map((genre) => `<span>${escapeHtml(genre)}</span>`).join('');
+  const genres = deriveGenres(record)
+    .slice(0, 3)
+    .map((genre) => `<span>${escapeHtml(genre)}</span>`)
+    .join('');
   const meta = [
     Array.isArray(record.creators) ? record.creators.join(', ') : null,
     record.date ?? null,
@@ -290,10 +299,11 @@ function renderHeroSpotlight(record) {
 
   return `
     <div class="hero-spotlight-card" data-hero-card data-record="${record.record_id}">
-      <p class="eyebrow">Spotlight edition</p>
+      <p class="eyebrow">Featured volume</p>
       <h3>${escapeHtml(record.title)}</h3>
       ${meta ? `<p class="meta">${escapeHtml(meta)}</p>` : ''}
       ${genres ? `<p class="meta meta--tags">${genres}</p>` : ''}
+      <div class="hero-spotlight-book">${renderRecordCard(record, { showCta: false })}</div>
       <a class="button" href="${record.permalink}">View record</a>
     </div>
   `;
@@ -311,6 +321,11 @@ function renderHome(records, stats, shelves) {
       subjects: record.subjects ?? [],
     })),
   );
+
+  const heroGalleryMarkup = shelves.heroRecords
+    .slice(0, 4)
+    .map((record) => `<div class="hero-gallery__item">${renderRecordCard(record, { showCta: false })}</div>`)
+    .join('');
 
   const shelfPayload = toDataAttribute({
     carousels: shelves.carousels.map((shelf) => ({
@@ -358,7 +373,7 @@ function renderHome(records, stats, shelves) {
             </div>
           </header>
           <div class="shelf-track" data-shelf-track>
-            ${shelf.records.map((record) => renderRecordCard(record)).join('\n')}
+            ${shelf.records.map((record) => renderRecordCard(record, { showCta: false })).join('\n')}
           </div>
         </section>
       `,
@@ -408,19 +423,20 @@ function renderHome(records, stats, shelves) {
   `;
 
   return `
-    <section class="hero dynamic-hero" data-hero data-hero-payload="${heroPayload}">
+    <section class="hero dynamic-hero library-hero" data-hero data-ambient-hall data-hero-payload="${heroPayload}">
       <div class="hero-copy">
-        <p class="eyebrow">A living, client-side digital library</p>
-        <h2>Scholarly editions, animated for curious readers.</h2>
-        <p>Search ${stats.totalRecords} catalogued works or glide along interactive shelves arranged by genre, fiction, and non-fiction.</p>
+        <p class="eyebrow">The Waypoint stacks</p>
+        <h2>Wander a luminous reading room.</h2>
+        <p>Browse ${stats.totalRecords} catalogued works arranged on responsive shelves, or settle into the reading room for immersive editions.</p>
         <div class="hero-actions">
-          <a class="button primary" href="search/">Launch advanced search</a>
+          <a class="button primary" href="search/">Enter the reading hall</a>
           <button type="button" class="button ghost" data-hero-cycle>Shuffle spotlight</button>
         </div>
       </div>
       <div class="hero-spotlight" data-hero-spotlight>
         ${renderHeroSpotlight(shelves.heroRecords[0])}
       </div>
+      ${heroGalleryMarkup ? `<div class="hero-gallery" data-hero-gallery>${heroGalleryMarkup}</div>` : ''}
     </section>
     ${statsMarkup}
     <section class="shelf-collection" data-shelves data-shelf-payload="${shelfPayload}">
@@ -520,6 +536,14 @@ function renderRecord(record, allRecords) {
         `<a class="button" data-download="${key}" href="${withBase(basePath, href)}">${downloadLabels[key] ?? key.toUpperCase()}</a>`,
     )
     .join('\n');
+  const downloadsMarkup = downloadButtons
+    ? `<div class="download-buttons">${downloadButtons}</div>`
+    : '<span class="download-empty">No downloads available.</span>';
+  const readingSource = downloads.html ?? null;
+  const readerHeadingId = `reader-heading-${record.record_id}`;
+  const readingTrigger = readingSource
+    ? `<button type="button" class="button primary" data-open-reader data-reader-src="${escapeHtml(readingSource)}">Open reading room</button>`
+    : '';
 
   const subjectBadges = (record.subjects ?? [])
     .map((subject) => `<span>${escapeHtml(subject)}</span>`)
@@ -561,9 +585,41 @@ function renderRecord(record, allRecords) {
 
   const relatedMarkup = relatedRecords.length
     ? relatedRecords
-        .map((item) => renderRecordCard(item, { basePath, compact: true }))
+        .map((item) => renderRecordCard(item, { basePath, compact: true, showCta: false }))
         .join('\n')
     : '<p class="meta">More related titles will appear as the catalogue grows.</p>';
+
+  const readingRoomMarkup = readingSource
+    ? `
+      <div class="reading-room" data-reading-room data-reader-theme="day" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="${readerHeadingId}">
+        <div class="reading-room__backdrop" data-reader-close></div>
+        <div class="reading-room__panel" role="document" data-reading-panel tabindex="-1">
+          <header class="reading-room__toolbar">
+            <div class="reading-room__titles">
+              <h3 id="${readerHeadingId}">Immersive reader</h3>
+              <p>Adjust lighting, typography, and focus without leaving the stacks.</p>
+            </div>
+            <button type="button" class="reading-room__close" data-reader-close aria-label="Close reading room">&times;</button>
+          </header>
+          <div class="reading-room__controls">
+            <div class="reading-room__themes" role="group" aria-label="Reader theme">
+              <button type="button" class="is-active" data-reader-theme="day">Daylight</button>
+              <button type="button" data-reader-theme="sepia">Sepia</button>
+              <button type="button" data-reader-theme="night">Midnight</button>
+            </div>
+            <label class="reading-room__scale">
+              Text size
+              <input type="range" min="-2" max="2" value="0" step="1" data-reader-size />
+            </label>
+          </div>
+          <p class="reading-room__status" data-reading-status aria-live="polite"></p>
+          <article class="reading-room__content" data-reading-content tabindex="0">
+            <p>Preparing the reading room…</p>
+          </article>
+        </div>
+      </div>
+    `
+    : '';
 
   return renderLayout({
     title: `${record.title} — ${siteName}`,
@@ -583,7 +639,12 @@ function renderRecord(record, allRecords) {
           ]
             .filter(Boolean)
             .join(' · ')}</p>
-          <div class="downloads">${downloadButtons || '<span>No downloads available.</span>'}</div>
+          <div class="record-actions">
+            ${readingTrigger ? `<div class="record-actions__primary">${readingTrigger}</div>` : ''}
+            <div class="record-actions__downloads" aria-label="Download options">
+              ${downloadsMarkup}
+            </div>
+          </div>
           ${subjectBadges ? `<p class="meta meta--tags">${subjectBadges}</p>` : ''}
           ${record.abstract ? `<p>${escapeHtml(record.abstract)}</p>` : ''}
         </div>
@@ -602,6 +663,7 @@ function renderRecord(record, allRecords) {
           ${relatedMarkup}
         </div>
       </section>
+      ${readingRoomMarkup}
     `,
   });
 }
