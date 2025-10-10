@@ -1,0 +1,9 @@
+{
+  "site": {
+    "title": "Waypoint Digital Library",
+    "description": "A static-first digital library built with Astro.",
+    "imprint": "Waypoint Institute Library Editions",
+    "email": "contact@waypoint.example",
+    "baseUrl": "https://example.github.io/waypoint-library"
+  }
+}

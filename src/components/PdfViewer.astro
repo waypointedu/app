@@ -1,0 +1,29 @@
+---
+const { src } = Astro.props as { src?: string | null };
+---
+<div class="flex flex-col gap-3" x-data="pdfViewer('${src ?? ''}')">
+  <div class="h-[70vh] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    {src ? <iframe id="pdf-frame" src={src} title="PDF preview" class="h-full w-full" loading="lazy"></iframe> : <div class="flex h-full w-full items-center justify-center text-sm text-slate-500">PDF preview unavailable</div>}
+  </div>
+  <div>
+    {src ? (
+      <div class="flex gap-3">
+        <a href={src} class="rounded-full bg-primary-500 px-4 py-2 text-sm font-semibold text-white" target="_blank" rel="noreferrer">
+          Open full screen
+        </a>
+        <a href={src} download class="rounded-full border border-primary-500 px-4 py-2 text-sm font-semibold text-primary-600">
+          Download PDF
+        </a>
+      </div>
+    ) : (
+      <span class="text-sm text-slate-500">PDF download coming soon</span>
+    )}
+  </div>
+</div>
+<script type="module">
+  const pdfViewer = () => ({
+    init() {
+      // Reserved hook for progressive PDF.js mounting.
+    }
+  });
+</script>

@@ -1,0 +1,7 @@
+---
+import Reader from '../../../layouts/Reader.astro';
+const { slug } = Astro.params;
+---
+<Reader title={`Reading · ${slug}`}>
+  <iframe src={`/books/${slug}/build/index.html`} title="Reading edition" class="h-screen w-full border-0"></iframe>
+</Reader>

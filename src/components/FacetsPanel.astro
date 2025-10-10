@@ -1,0 +1,43 @@
+<section class="space-y-4" x-data="facetsPanel()">
+  <h2 class="text-lg font-semibold">Filter Results</h2>
+  <template x-for="facet in facets" :key="facet.id">
+    <div>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ facet.label }}</h3>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <template x-for="value in facet.values" :key="value.value">
+          <button
+            class="rounded-full border border-slate-300 px-3 py-1 text-xs"
+            :class="value.active ? 'bg-primary-500 text-white border-primary-500' : 'bg-white dark:bg-slate-900'"
+            @click="toggle(facet.id, value.value)"
+          >{{ value.label }}</button>
+        </template>
+      </div>
+    </div>
+  </template>
+  <button class="text-sm font-medium text-primary-600" @click="reset()">Clear all</button>
+</section>
+<script type="module">
+  const facetsPanel = () => ({
+    facets: [
+      { id: 'subjects', label: 'Subjects', values: [] },
+      { id: 'collection', label: 'Collection', values: [] },
+      { id: 'language', label: 'Language', values: [] }
+    ],
+    toggle(id, value) {
+      const url = new URL(window.location.href);
+      const params = url.searchParams.getAll(id);
+      if (params.includes(value)) {
+        url.searchParams.delete(id);
+        params.filter((p) => p !== value).forEach((p) => url.searchParams.append(id, p));
+      } else {
+        url.searchParams.append(id, value);
+      }
+      window.location.href = url.toString();
+    },
+    reset() {
+      const url = new URL(window.location.href);
+      ['subjects', 'collection', 'language'].forEach((param) => url.searchParams.delete(param));
+      window.location.href = url.toString();
+    }
+  });
+</script>
