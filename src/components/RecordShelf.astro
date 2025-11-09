@@ -1,0 +1,40 @@
+---
+import RecordCard from './RecordCard.astro';
+
+const { id, label, records = [] } = Astro.props as {
+  id: string;
+  label: string;
+  records?: any[];
+};
+
+const listId = `${id}-list`;
+---
+<section class="space-y-4" role="region" aria-label={`${label} shelf`} data-shelf>
+  <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold">{label}</h2>
+      <p class="card__meta text-sm">Featured selections from our editors.</p>
+    </div>
+    <div class="record-shelf__controls">
+      <button type="button" data-shelf-prev aria-controls={listId} aria-label={`Previous on ${label} shelf`}>
+        ←
+      </button>
+      <button type="button" data-shelf-next aria-controls={listId} aria-label={`Next on ${label} shelf`}>
+        →
+      </button>
+    </div>
+  </header>
+  <ul id={listId} class="record-shelf__list" role="listbox" aria-label={label} data-shelf-list>
+    {records.map((record, index) => (
+      <li
+        class="record-shelf__item"
+        role="option"
+        tabindex={index === 0 ? 0 : -1}
+        aria-selected={index === 0}
+        data-shelf-item
+      >
+        <RecordCard {...record} />
+      </li>
+    ))}
+  </ul>
+</section>

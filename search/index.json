@@ -5,22 +5,34 @@
     "creators": [
       "Augustine of Hippo"
     ],
+    "year": 1900,
     "subjects": [
       "Patristics",
       "Autobiography"
     ],
-    "genres": [
+    "collection": "Classics",
+    "language": "en",
+    "type": "Book",
+    "summary": "Augustine's meditation on faith, memory, and conversion in a modernized bilingual edition.",
+    "tags": [
       "Non-Fiction",
       "Memoir",
       "Theology",
-      "Biography",
-      "Autobiography"
+      "Biography"
     ],
-    "collection": "Waypoint Classics",
-    "year": 1900,
-    "lang": "en",
     "quality": "A",
-    "permalink": "record/2025-0003/"
+    "permalink": "record/2025-0003/",
+    "normalized": {
+      "title": "the confessions",
+      "creators": [
+        "augustine of hippo"
+      ],
+      "subjects": [
+        "patristics",
+        "autobiography"
+      ],
+      "collection": "classics"
+    }
   },
   {
     "id": "2025-0004",
@@ -28,19 +40,32 @@
     "creators": [
       "Jane Austen"
     ],
+    "year": 1891,
     "subjects": [
       "Fiction",
       "Romance"
     ],
-    "genres": [
+    "collection": "Classics",
+    "language": "en",
+    "type": "Novel",
+    "summary": "Jane Austen's final completed novel in a reader-friendly critical edition.",
+    "tags": [
       "Fiction",
       "Novel",
       "Romance"
     ],
-    "collection": "Waypoint Classics",
-    "year": 1891,
-    "lang": "en",
     "quality": "A",
-    "permalink": "record/2025-0004/"
+    "permalink": "record/2025-0004/",
+    "normalized": {
+      "title": "persuasion",
+      "creators": [
+        "jane austen"
+      ],
+      "subjects": [
+        "fiction",
+        "romance"
+      ],
+      "collection": "classics"
+    }
   }
 ]
