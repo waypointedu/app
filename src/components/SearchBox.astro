@@ -4,13 +4,16 @@ const { minimal = false } = Astro.props as { minimal?: boolean };
 <div
   class:list={[
     'relative',
-    minimal ? 'w-full max-w-[240px]' : 'w-full'
+    minimal ? 'w-full max-w-[280px]' : 'w-full'
   ]}
   x-data="searchBox()"
 >
   <input
     type="search"
-    class="search-field"
+    class:list={[
+      'search-field',
+      minimal ? 'search-field--inverse pr-20' : 'pr-24 shadow-sm'
+    ]}
     placeholder="Search the library"
     x-model="query"
     @keydown.enter="go()"
@@ -22,7 +25,7 @@ const { minimal = false } = Astro.props as { minimal?: boolean };
     @click="go()"
     aria-label="Run search"
   >
-    Go
+    Search
   </button>
 </div>
 <script type="module">

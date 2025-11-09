@@ -113,11 +113,11 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
   >
     <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div class="space-y-2">
-        <p class="text-sm font-semibold uppercase tracking-[0.3em]" style="color: var(--brand)">Discover</p>
-        <h1 class="text-3xl font-bold tracking-tight" style="color: var(--ink)">Search the catalogue</h1>
-        <p class="max-w-2xl card__meta">
-          Search across titles, authors, subjects, and collections. Use subjects, author, or era to focus the grid and share the
-          URL to keep filters in sync.
+        <p class="text-sm font-semibold uppercase tracking-[0.3em]" style="color: var(--brand)">Waypoint Institute Library</p>
+        <h1 class="text-3xl font-bold tracking-tight" style="color: var(--ink)">Catalogue of record</h1>
+        <p class="max-w-2xl hero__lede">
+          Survey the Institute&#39;s edited holdings by title, author, subject, or era. Filters persist in the URL so faculty and
+          students can cite or revisit the exact shelf they need.
         </p>
       </div>
       <div class="flex w-full flex-col gap-3 lg:max-w-sm">
@@ -270,6 +270,14 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
 
       const renderBook = (record) => {
         const title = escapeHtml(record.title ?? 'Untitled');
+        const safeId = (record.id ?? record.record_id ?? record.permalink ?? title)
+          .toString()
+          .replace(/[^a-z0-9]+/gi, '-')
+          .toLowerCase();
+        const cardId = `book-${safeId}`;
+        const metaId = `${cardId}-meta`;
+        const previewId = `${cardId}-preview`;
+        const previewTitleId = `${cardId}-preview-title`;
         const permalink = record.permalink?.startsWith('/') ? record.permalink : `/${record.permalink ?? ''}`;
         const authors = Array.isArray(record.authors)
           ? record.authors.filter(Boolean)
@@ -290,22 +298,55 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
         const tags = subjects
           .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
           .join('');
+        const abstract = record.abstract ?? record.summary ?? '';
+        const preview = abstract ? escapeHtml(abstract) : '';
+        const hasPreview = preview.length > 0;
+        const quality = record.quality ?? record.quality_grade ?? '';
+        const qualityChip = quality
+          ? `<span class="chip" aria-label="Quality grade ${escapeHtml(String(quality))}">Quality ${escapeHtml(String(quality))}</span>`
+          : '<span class="card__meta text-xs" style="opacity:0.7">Digital edition</span>';
+        const previewControl = hasPreview
+          ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}">Preview</button>`
+          : '<span class="card__meta text-xs" style="opacity:0.8">Open for full details</span>';
 
         return `
           <div role="listitem">
-            <article class="book" role="article">
-              <a class="book__link" href="${escapeHtml(permalink)}" aria-label="Open record: ${title}">
-                <figure class="book__cover">
-                  ${cover}
-                  <span class="book__edge" aria-hidden="true"></span>
-                </figure>
-                <div class="book__meta">
-                  <h3 class="book__title">${title}</h3>
-                  ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
-                  ${collection ? `<p class="card__meta text-sm" style="margin:0 0 0.4rem">${collection}</p>` : ''}
-                  ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+            <article class="book" role="article" data-book-card${hasPreview ? ' data-has-preview="true"' : ''}>
+              <div class="book__wrapper">
+                <div class="book__face book__face--front">
+                  <a class="book__stretched" href="${escapeHtml(permalink)}" aria-labelledby="${cardId}" aria-describedby="${metaId}">
+                    <span class="sr-only">Open record: ${title}</span>
+                  </a>
+                  <figure class="book__figure">
+                    ${cover}
+                    <span class="book__edge" aria-hidden="true"></span>
+                  </figure>
+                  <div class="book__info">
+                    <h3 id="${cardId}" class="book__title">${title}</h3>
+                    ${authorsLine ? `<p class="book__author" id="${metaId}">${authorsLine}</p>` : ''}
+                    ${collection ? `<p class="card__meta text-xs uppercase tracking-[0.2em]" style="margin:0; letter-spacing:0.22em">${collection}</p>` : ''}
+                    ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+                  </div>
+                  <div class="book__footer">
+                    ${qualityChip}
+                    ${previewControl}
+                  </div>
                 </div>
-              </a>
+                ${hasPreview ? `
+                <div class="book__face book__face--back" id="${previewId}" role="region" aria-labelledby="${previewTitleId}">
+                  <header>
+                    <h3 id="${previewTitleId}">${title}</h3>
+                    ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
+                    ${collection ? `<span class="chip" style="width:fit-content">${collection}</span>` : ''}
+                  </header>
+                  <p class="book__summary" tabindex="-1">${preview}</p>
+                  <div class="book__actions">
+                    <a class="button" href="${escapeHtml(permalink)}">Open record</a>
+                    <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}">Return to cover</button>
+                  </div>
+                </div>
+                ` : ''}
+              </div>
             </article>
           </div>
         `;
@@ -465,7 +506,7 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
 
         if (resultsRegion) {
           if (!count) {
-            resultsRegion.innerHTML = `<p class="card text-center text-sm" style="border-style:dashed;border-color:var(--line);box-shadow:none">No results for “${escapeHtml(state.query)}”. Try removing filters or explore related subjects.</p>`;
+            resultsRegion.innerHTML = `<p class="card text-center text-sm" style="border-style:dashed;border-color:var(--line);box-shadow:none">No records match “${escapeHtml(state.query)}”. Reset filters or browse highlighted subjects.</p>`;
           } else {
             const grid = document.createElement('div');
             grid.className = 'results-grid';
@@ -473,6 +514,7 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
             grid.innerHTML = hits.map((record) => renderBook(record)).join('');
             resultsRegion.innerHTML = '';
             resultsRegion.appendChild(grid);
+            window.WaypointBookCards?.mount(grid);
           }
         }
       };

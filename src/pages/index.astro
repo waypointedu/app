@@ -39,9 +39,9 @@ const shelves = (uniqueCollections.length ? uniqueCollections : ['Featured volum
 }));
 
 const stats = [
-  { label: 'Records edited', value: records.length },
-  { label: 'Collections represented', value: uniqueCollections.length || 1 },
-  { label: 'Distinct subjects', value: subjectCounts.size || topSubjects.length }
+  { label: 'Volumes digitized', value: records.length },
+  { label: 'Active collections', value: uniqueCollections.length || 1 },
+  { label: 'Subjects indexed', value: subjectCounts.size || topSubjects.length }
 ];
 ---
 <Base>
@@ -52,13 +52,19 @@ const stats = [
   >
     <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
       <div class="space-y-8">
-        <p class="text-sm font-semibold uppercase tracking-[0.35em]" style="color: var(--brand)">
-          Waypoint Institute Library Editions
-        </p>
-        <h1>Explore carefully edited public-domain works.</h1>
-        <p>
-          Download EPUB/PDF or read online; every record includes provenance, preservation files, and citation helpers so you can
-          share with confidence.
+        <div class="flex items-center gap-4">
+          <span class="hero__seal" aria-hidden="true">WI</span>
+          <div class="space-y-1">
+            <p class="text-xs font-semibold uppercase tracking-[0.35em]" style="color: var(--muted)">
+              Waypoint Institute
+            </p>
+            <p class="text-lg font-semibold" style="color: var(--ink)">Library &amp; Archives</p>
+          </div>
+        </div>
+        <h1>Guardians of the Institute&#39;s scholarly heritage.</h1>
+        <p class="hero__lede">
+          The official repository for the Waypoint Institute&#39;s classical, theological, and literary collections. Every digital
+          edition is annotated for provenance, verified for textual fidelity, and prepared for study in the hall or abroad.
         </p>
         <div class="hero__search">
           <SearchBox minimal={false} />
@@ -95,7 +101,7 @@ const stats = [
         <RecordShelf {...shelf} />
       ))}
       <div class="space-y-4">
-        <h2 class="text-2xl font-semibold">Browse by subject</h2>
+        <h2 class="text-2xl font-semibold">Subjects of note</h2>
         <div class="flex flex-wrap gap-3">
           {topSubjects.map((subject) => (
             <a class="chip" href={`/search/?subject=${encodeURIComponent(subject)}`}>
@@ -106,8 +112,8 @@ const stats = [
       </div>
       <div class="space-y-6">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <h2 class="text-2xl font-semibold">New arrivals</h2>
-          <p class="card__meta text-sm">Updated as new editions are published.</p>
+          <h2 class="text-2xl font-semibold">Recent additions</h2>
+          <p class="card__meta text-sm">Updated as Institute-approved editions join the shelves.</p>
         </div>
         <ResultsGrid results={records} />
       </div>
@@ -144,10 +150,20 @@ const stats = [
 
     const renderBook = (record) => {
       const title = escapeHtml(record.title ?? 'Untitled');
-      const permalink = record.permalink?.startsWith('/')
-        ? record.permalink
-        : `/${record.permalink ?? ''}`;
-      const authors = Array.isArray(record.creators) ? record.creators.filter(Boolean) : [];
+      const safeId = (record.id ?? record.record_id ?? record.permalink ?? title)
+        .toString()
+        .replace(/[^a-z0-9]+/gi, '-')
+        .toLowerCase();
+      const cardId = `book-${safeId}`;
+      const metaId = `${cardId}-meta`;
+      const previewId = `${cardId}-preview`;
+      const previewTitleId = `${cardId}-preview-title`;
+      const permalink = record.permalink?.startsWith('/') ? record.permalink : `/${record.permalink ?? ''}`;
+      const authors = Array.isArray(record.creators)
+        ? record.creators.filter(Boolean)
+        : Array.isArray(record.authors)
+        ? record.authors.filter(Boolean)
+        : [];
       const year = record.year ?? record.date ?? '';
       const collection = record.collection ? escapeHtml(record.collection) : '';
       const subjects = Array.isArray(record.subjects) ? record.subjects.slice(0, 3) : [];
@@ -162,21 +178,54 @@ const stats = [
       const tags = subjects
         .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
         .join('');
+      const abstract = record.abstract ?? record.summary ?? '';
+      const preview = abstract ? escapeHtml(abstract) : '';
+      const hasPreview = preview.length > 0;
+      const quality = record.quality ?? record.quality_grade ?? '';
+      const qualityChip = quality
+        ? `<span class="chip" aria-label="Quality grade ${escapeHtml(String(quality))}">Quality ${escapeHtml(String(quality))}</span>`
+        : '<span class="card__meta text-xs" style="opacity:0.7">Digital edition</span>';
+      const previewControl = hasPreview
+        ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}">Preview</button>`
+        : '<span class="card__meta text-xs" style="opacity:0.8">Open for full details</span>';
 
       return `
-        <article class="book" role="article">
-          <a class="book__link" href="${escapeHtml(permalink)}" aria-label="Open record: ${title}">
-            <figure class="book__cover">
-              ${cover}
-              <span class="book__edge" aria-hidden="true"></span>
-            </figure>
-            <div class="book__meta">
-              <h3 class="book__title">${title}</h3>
-              ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
-              ${collection ? `<p class="card__meta text-sm" style="margin:0 0 0.4rem">${collection}</p>` : ''}
-              ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+        <article class="book" role="article" data-book-card${hasPreview ? ' data-has-preview="true"' : ''}>
+          <div class="book__wrapper">
+            <div class="book__face book__face--front">
+              <a class="book__stretched" href="${escapeHtml(permalink)}" aria-labelledby="${cardId}" aria-describedby="${metaId}">
+                <span class="sr-only">Open record: ${title}</span>
+              </a>
+              <figure class="book__figure">
+                ${cover}
+                <span class="book__edge" aria-hidden="true"></span>
+              </figure>
+              <div class="book__info">
+                <h3 id="${cardId}" class="book__title">${title}</h3>
+                ${authorsLine ? `<p class="book__author" id="${metaId}">${authorsLine}</p>` : ''}
+                ${collection ? `<p class="card__meta text-xs uppercase tracking-[0.2em]" style="margin:0; letter-spacing:0.22em">${collection}</p>` : ''}
+                ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+              </div>
+              <div class="book__footer">
+                ${qualityChip}
+                ${previewControl}
+              </div>
             </div>
-          </a>
+            ${hasPreview ? `
+            <div class="book__face book__face--back" id="${previewId}" role="region" aria-labelledby="${previewTitleId}">
+              <header>
+                <h3 id="${previewTitleId}">${title}</h3>
+                ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
+                ${collection ? `<span class="chip" style="width:fit-content">${collection}</span>` : ''}
+              </header>
+              <p class="book__summary" tabindex="-1">${preview}</p>
+              <div class="book__actions">
+                <a class="button" href="${escapeHtml(permalink)}">Open record</a>
+                <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}">Return to cover</button>
+              </div>
+            </div>
+            ` : ''}
+          </div>
         </article>
       `;
     };
@@ -224,6 +273,7 @@ const stats = [
           selection.push(renderBook(records[index] ?? {}));
         }
         grid.innerHTML = selection.map((markup) => `<div role="listitem">${markup}</div>`).join('');
+        window.WaypointBookCards?.mount(grid);
       };
 
       const advance = () => {

@@ -11,16 +11,24 @@ const navItems = [
 ];
 ---
 <header class="site-header" role="banner">
-  <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
-    <a href="/" class="text-xl font-semibold tracking-tight" style="color:var(--ink)">Waypoint Digital Library</a>
-    <nav class="hidden items-center gap-1 text-sm font-medium md:flex" aria-label="Primary">
-      {navItems.map((item) => (
-        <a class="nav-link" href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
-          {item.label}
-        </a>
-      ))}
-    </nav>
-    <div class="flex items-center gap-2">
+  <div class="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-4 text-sm text-white md:flex-row md:items-center md:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:flex-1">
+      <a href="/" class="site-header__brand">
+        <span class="site-header__crest" aria-hidden="true">WI</span>
+        <span class="flex flex-col leading-snug">
+          <span class="text-[0.7rem] uppercase tracking-[0.35em] opacity-80">Waypoint Institute</span>
+          <span class="text-lg">Library &amp; Archives</span>
+        </span>
+      </a>
+      <nav class="flex flex-wrap items-center gap-1" aria-label="Primary navigation">
+        {navItems.map((item) => (
+          <a class="nav-link" href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+    <div class="w-full max-w-xs md:w-auto">
       <SearchBox minimal={true} />
     </div>
   </div>

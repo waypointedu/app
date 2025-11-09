@@ -7,56 +7,109 @@ const {
   collection,
   quality,
   coverUrl,
-  permalink
+  permalink,
+  abstract,
+  summary
 } = Astro.props as Record<string, any>;
 
 const normalizedPermalink = permalink?.startsWith('/') ? permalink : `/${permalink ?? ''}`;
 const headingId = `record-card-${(normalizedPermalink ?? title ?? 'card').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
 const metaId = `${headingId}-meta`;
-const fallbackInitial = String(title ?? '').trim().slice(0, 1).toUpperCase();
+const previewId = `${headingId}-preview`;
+const previewText = abstract ?? summary ?? '';
+const displaySubjects = subjects.filter(Boolean).slice(0, 3);
+const displayCreators = Array.isArray(creators) ? creators.filter(Boolean) : [];
+const fallbackInitial = String(title ?? '').trim().slice(0, 1).toUpperCase() || 'W';
+const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · ');
 ---
-<article class="book" role="article">
-  <a class="book__link" href={normalizedPermalink} aria-labelledby={headingId} aria-describedby={metaId}>
-    <figure class="book__cover">
-      {coverUrl ? (
-        <img
-          src={coverUrl}
-          alt={`Cover of ${title}`}
-          loading="lazy"
-          decoding="async"
-          fetchpriority="low"
-        />
-      ) : (
-        <div class="book__fallback" aria-hidden="true">{fallbackInitial}</div>
-      )}
-      <span class="book__edge" aria-hidden="true"></span>
-    </figure>
-    <div class="book__meta">
-      <h3 id={headingId} class="book__title">
-        {title}
-      </h3>
-      {(creators.length || year) && (
-        <p class="book__author" id={metaId}>
-          {creators.length ? creators.join(', ') : null}
-          {creators.length && year ? <span class="sep"> · </span> : null}
-          {year ? <span class="book__year">{year}</span> : null}
-        </p>
-      )}
-      {collection ? (
-        <p class="card__meta text-sm" style="margin: 0 0 0.4rem">{collection}</p>
-      ) : null}
-      {subjects.length ? (
-        <div class="book__tags" role="list">
-          {subjects.slice(0, 3).map((subject) => (
-            <span role="listitem" class="chip">
-              {subject}
-            </span>
-          ))}
-        </div>
-      ) : null}
-      {quality ? (
-        <span class="chip" aria-label={`Quality grade ${quality}`}>Quality {quality}</span>
-      ) : null}
+<article class="book" data-book-card data-has-preview={previewText ? 'true' : undefined}>
+  <div class="book__wrapper">
+    <div class="book__face book__face--front">
+      <a
+        class="book__stretched"
+        href={normalizedPermalink}
+        aria-labelledby={headingId}
+        aria-describedby={metaId}
+      >
+        <span class="sr-only">Open record: {title}</span>
+      </a>
+      <figure class="book__figure">
+        {coverUrl ? (
+          <img
+            src={coverUrl}
+            alt={`Cover of ${title}`}
+            loading="lazy"
+            decoding="async"
+            fetchpriority="low"
+          />
+        ) : (
+          <div class="book__fallback" aria-hidden="true">{fallbackInitial}</div>
+        )}
+        <span class="book__edge" aria-hidden="true"></span>
+      </figure>
+      <div class="book__info">
+        <h3 id={headingId} class="book__title">{title}</h3>
+        {authorLine ? (
+          <p class="book__author" id={metaId}>{authorLine}</p>
+        ) : null}
+        {collection ? (
+          <p class="card__meta text-xs uppercase tracking-[0.2em]" style="margin: 0; letter-spacing: 0.22em">
+            {collection}
+          </p>
+        ) : null}
+        {displaySubjects.length ? (
+          <div class="book__tags" role="list">
+            {displaySubjects.map((subject) => (
+              <span role="listitem" class="chip">{subject}</span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <div class="book__footer">
+        {quality ? (
+          <span class="chip" aria-label={`Quality grade ${quality}`}>Quality {quality}</span>
+        ) : (
+          <span class="card__meta text-xs" style="opacity: 0.7">Digital edition</span>
+        )}
+        {previewText ? (
+          <button
+            type="button"
+            class="book__preview-button"
+            data-book-toggle
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls={previewId}
+          >
+            Preview
+          </button>
+        ) : (
+          <span class="card__meta text-xs" style="opacity: 0.8">Open for full details</span>
+        )}
+      </div>
     </div>
-  </a>
+    {previewText ? (
+      <div class="book__face book__face--back" id={previewId} role="region" aria-labelledby={`${headingId}-preview-title`}>
+        <header>
+          <h3 id={`${headingId}-preview-title`}>{title}</h3>
+          {authorLine ? <p class="book__author">{authorLine}</p> : null}
+          {collection ? (
+            <span class="chip" style="width: fit-content">{collection}</span>
+          ) : null}
+        </header>
+        <p class="book__summary" tabindex="-1">{previewText}</p>
+        <div class="book__actions">
+          <a class="button" href={normalizedPermalink}>Open record</a>
+          <button
+            type="button"
+            class="book__preview-close"
+            data-book-toggle
+            aria-expanded="true"
+            aria-controls={previewId}
+          >
+            Return to cover
+          </button>
+        </div>
+      </div>
+    ) : null}
+  </div>
 </article>

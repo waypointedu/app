@@ -32,6 +32,7 @@ for (const file of files) {
     era: computeEra(year),
     lang: data.language ?? null,
     quality: data.quality_grade ?? null,
+    abstract: data.abstract ?? null,
     permalink: data.identifiers?.permalink ?? `/record/${data.record_id}`
   });
 }

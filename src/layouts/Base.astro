@@ -29,5 +29,62 @@ const { title = 'Waypoint Digital Library', description = 'Scholarly, open digit
       <slot />
     </main>
     <Footer />
+    <script type="module" is:inline>
+      const enhanceCard = (card) => {
+        if (!(card instanceof HTMLElement) || card.dataset.bookReady) return;
+        const toggles = card.querySelectorAll('[data-book-toggle]');
+        if (!toggles.length) {
+          card.dataset.bookReady = 'true';
+          return;
+        }
+        const back = card.querySelector('.book__face--back');
+        const setState = (flipped) => {
+          card.toggleAttribute('data-flipped', flipped);
+          card.dataset.flipped = flipped ? 'true' : 'false';
+          toggles.forEach((button) => button.setAttribute('aria-expanded', flipped ? 'true' : 'false'));
+          if (!flipped) return;
+          const summary = back?.querySelector('.book__summary');
+          if (summary instanceof HTMLElement) summary.focus();
+        };
+        toggles.forEach((button) => {
+          button.addEventListener('click', (event) => {
+            event.preventDefault();
+            const flipped = card.hasAttribute('data-flipped');
+            setState(!flipped);
+            if (!flipped) {
+              const summary = back?.querySelector('.book__summary');
+              if (summary instanceof HTMLElement) summary.focus();
+            }
+          });
+        });
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && card.hasAttribute('data-flipped')) {
+            setState(false);
+            const trigger = toggles[0];
+            if (trigger instanceof HTMLElement) trigger.focus();
+          }
+        });
+        const frontLink = card.querySelector('.book__stretched');
+        frontLink?.addEventListener('focus', () => {
+          if (card.hasAttribute('data-flipped')) setState(false);
+        });
+        card.dataset.bookReady = 'true';
+      };
+
+      const mountBookCards = (scope = document) => {
+        scope.querySelectorAll('[data-book-card]').forEach((card) => enhanceCard(card));
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => mountBookCards(), { once: true });
+      } else {
+        mountBookCards();
+      }
+
+      window.WaypointBookCards = {
+        mount: mountBookCards,
+        enhance: enhanceCard
+      };
+    </script>
   </body>
 </html>
