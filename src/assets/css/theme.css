@@ -1,0 +1,84 @@
+/* Modern Academic theme tokens */
+:root {
+  --bg: #F8FAFC;
+  --panel: #FFFFFF;
+  --ink: #0F172A;
+  --muted: #475569;
+  --line: #E2E8F0;
+
+  --brand: #365B9E;
+  --brand-600: #2B4A81;
+  --brand-100: #E6EEF9;
+
+  --book-edge: #D8DEE9;
+  --book-shadow: rgba(2, 6, 23, 0.1);
+
+  --radius: 16px;
+  --radius-lg: 20px;
+  --shadow: 0 10px 28px rgba(2, 6, 23, 0.08);
+  --shadow-strong: 0 18px 42px rgba(2, 6, 23, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B1220;
+    --panel: #0F172A;
+    --ink: #E5E7EB;
+    --muted: #94A3B8;
+    --line: #1F2937;
+
+    --brand: #86A6E2;
+    --brand-600: #BBD0FF;
+    --brand-100: #182036;
+
+    --book-edge: #2B3446;
+    --book-shadow: rgba(0, 0, 0, 0.4);
+
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    --shadow-strong: 0 18px 42px rgba(0, 0, 0, 0.45);
+  }
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--brand-600);
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: var(--brand-100);
+  color: var(--brand-600);
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}

@@ -2,12 +2,21 @@
 import RecordCard from './RecordCard.astro';
 const { results = [] } = Astro.props as { results?: any[] };
 ---
-<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+<div>
   {results.length === 0 ? (
-    <p class="col-span-full rounded-lg border border-dashed border-slate-300 bg-white/80 p-8 text-center text-sm text-slate-500">
+    <p
+      class="card text-center text-sm"
+      style="border-style: dashed; border-color: var(--line); box-shadow: none"
+    >
       No results found. Adjust filters or search terms.
     </p>
   ) : (
-    results.map((record) => <RecordCard {...record} />)
+    <div class="results-grid" role="list">
+      {results.map((record) => (
+        <div role="listitem">
+          <RecordCard {...record} />
+        </div>
+      ))}
+    </div>
   )}
 </div>
