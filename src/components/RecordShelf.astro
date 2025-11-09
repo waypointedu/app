@@ -7,34 +7,42 @@ const { id, label, records = [] } = Astro.props as {
   records?: any[];
 };
 
-const listId = `${id}-list`;
+const trackId = `${id}-track`;
 ---
-<section class="space-y-4" role="region" aria-label={`${label} shelf`} data-shelf>
-  <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<section class="shelf" role="region" aria-label={label} data-shelf>
+  <header class="shelf__head">
     <div>
       <h2 class="text-2xl font-semibold">{label}</h2>
       <p class="card__meta text-sm">Featured selections from our editors.</p>
     </div>
-    <div class="record-shelf__controls">
-      <button type="button" data-shelf-prev aria-controls={listId} aria-label={`Previous on ${label} shelf`}>
+    <div class="shelf__controls">
+      <button type="button" data-shelf-prev aria-controls={trackId} aria-label={`Previous on ${label} shelf`}>
         ←
       </button>
-      <button type="button" data-shelf-next aria-controls={listId} aria-label={`Next on ${label} shelf`}>
+      <button type="button" data-shelf-next aria-controls={trackId} aria-label={`Next on ${label} shelf`}>
         →
       </button>
     </div>
   </header>
-  <ul id={listId} class="record-shelf__list" role="listbox" aria-label={label} data-shelf-list>
+  <div
+    id={trackId}
+    class="shelf__track"
+    role="listbox"
+    aria-label={label}
+    aria-orientation="horizontal"
+    tabindex="0"
+    data-shelf-track
+  >
     {records.map((record, index) => (
-      <li
-        class="record-shelf__item"
+      <div
+        class="item"
         role="option"
         tabindex={index === 0 ? 0 : -1}
         aria-selected={index === 0}
         data-shelf-item
       >
         <RecordCard {...record} />
-      </li>
+      </div>
     ))}
-  </ul>
+  </div>
 </section>

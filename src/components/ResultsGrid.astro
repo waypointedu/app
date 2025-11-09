@@ -11,12 +11,12 @@ const { results = [] } = Astro.props as { results?: any[] };
       No results found. Adjust filters or search terms.
     </p>
   ) : (
-    <ul role="list" class="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+    <div class="results-grid" role="list">
       {results.map((record) => (
-        <li class="h-full">
+        <div role="listitem">
           <RecordCard {...record} />
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   )}
 </div>

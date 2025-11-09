@@ -7,10 +7,12 @@ import index from '../../search/index.json';
 const url = Astro.url;
 const query = url.searchParams.get('q') ?? '';
 const filters = {
-  subjects: url.searchParams.getAll('subjects'),
-  collection: url.searchParams.getAll('collection'),
-  language: url.searchParams.getAll('language')
+  subjects: url.searchParams.getAll('subject'),
+  author: url.searchParams.get('author') ?? '',
+  era: url.searchParams.get('era') ?? ''
 };
+
+const eraOptions = ['Ancient', 'Medieval', 'Renaissance', 'Early Modern', 'Modern', 'Contemporary'];
 
 const normalize = (value: string) =>
   value
@@ -23,11 +25,10 @@ const fuseOptions: Fuse.IFuseOptions<any> = {
   threshold: 0.3,
   ignoreLocation: true,
   keys: [
-    { name: 'title', weight: 0.5 },
-    { name: 'creators', weight: 0.25 },
+    { name: 'title', weight: 0.55 },
+    { name: 'authors', weight: 0.25 },
     { name: 'subjects', weight: 0.15 },
-    { name: 'collection', weight: 0.05 },
-    { name: 'year', weight: 0.05 }
+    { name: 'collection', weight: 0.05 }
   ]
 };
 
@@ -76,32 +77,47 @@ const applyFilters = (records: { item: any; score: number }[]) =>
     .filter((record) => {
       const subjectMatch =
         !filters.subjects.length || filters.subjects.every((subject) => record.subjects?.includes(subject));
-      const collectionMatch =
-        !filters.collection.length || filters.collection.every((value) => record.collection === value);
-      const languageMatch =
-        !filters.language.length || filters.language.every((value) => record.language === value);
-      return subjectMatch && collectionMatch && languageMatch;
+      const authorMatch =
+        !filters.author || normalize((record.authors ?? record.creators ?? []).join(' ')).includes(normalize(filters.author));
+      const eraMatch = !filters.era || record.era === filters.era;
+      return subjectMatch && authorMatch && eraMatch;
     })
     .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
 
 const results = applyFilters(fuseResults);
 
-const filterCount = filters.subjects.length + filters.collection.length + filters.language.length;
+const filterCount = filters.subjects.length + (filters.author ? 1 : 0) + (filters.era ? 1 : 0);
 
 const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c');
+const authorOptions = Array.from(
+  new Set(
+    index.flatMap((record: any) =>
+      Array.isArray(record.authors)
+        ? record.authors
+        : Array.isArray(record.creators)
+        ? record.creators
+        : []
+    )
+  )
+)
+  .filter(Boolean)
+  .sort((a, b) => String(a).localeCompare(String(b)));
+const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
 ---
 <SearchLayout>
   <section
     class="space-y-10"
     data-search-app
     data-payload={payload}
+    data-authors={authorsPayload}
   >
     <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div class="space-y-2">
-        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary-500">Discover</p>
-        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search the catalogue</h1>
-        <p class="max-w-2xl text-slate-600 dark:text-slate-300">
-          Type a query to search across titles, creators, subjects, and collections. Use the facets to narrow the grid and share the URL to keep state with collaborators.
+        <p class="text-sm font-semibold uppercase tracking-[0.3em]" style="color: var(--brand)">Discover</p>
+        <h1 class="text-3xl font-bold tracking-tight" style="color: var(--ink)">Search the catalogue</h1>
+        <p class="max-w-2xl card__meta">
+          Search across titles, authors, subjects, and collections. Use subjects, author, or era to focus the grid and share the
+          URL to keep filters in sync.
         </p>
       </div>
       <div class="flex w-full flex-col gap-3 lg:max-w-sm">
@@ -110,36 +126,36 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
           <input
             id="search-input"
             type="search"
-            class="w-full rounded-full border border-slate-300 bg-white/80 px-5 py-3 text-base shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800/90"
-            placeholder="Search by title, creator, or subject"
+            class="w-full rounded-full border border-[var(--line)] bg-white/90 px-5 py-3 text-base shadow-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70"
+            placeholder="Search by title, author, or subject"
             autocomplete="off"
             data-search-input
             value={query}
           />
           <span class="pointer-events-none absolute inset-y-0 right-5 flex items-center text-sm text-slate-400" aria-hidden="true">⌘K</span>
         </div>
-        <div class="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
-          <span data-result-count>{results.length} result{results.length === 1 ? '' : 's'}</span>
-          <button type="button" class="font-medium text-primary-600 hover:underline" data-clear-desktop hidden={filterCount === 0 && !query}>
-            Clear all
-          </button>
-        </div>
-        <button
-          type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 lg:hidden"
-          data-open-facets
-          aria-controls="mobile-facets-panel"
-          aria-expanded="false"
-        >
-          Refine filters
-        </button>
       </div>
     </header>
+    <div class="flex items-center justify-between text-sm card__meta">
+      <span data-result-count>{results.length} result{results.length === 1 ? '' : 's'}</span>
+      <button type="button" class="font-medium text-[var(--brand)]" data-clear-desktop hidden={filterCount === 0 && !query}>
+        Clear all
+      </button>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-[var(--brand-100)] focus-visible:outline-none lg:hidden"
+      data-open-facets
+      aria-controls="mobile-facets-panel"
+      aria-expanded="false"
+    >
+      Refine filters
+    </button>
     <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-      <aside class="hidden rounded-2xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80 lg:block" data-facets-desktop-wrapper>
+      <aside class="hidden rounded-2xl border border-[var(--line)] bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 lg:block" data-facets-desktop-wrapper>
         <div class="flex items-center justify-between">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Refine results</h2>
-          <button type="button" class="text-sm font-medium text-primary-600 hover:underline" data-clear-desktop hidden={filterCount === 0 && !query}>
+          <h2 class="text-sm font-semibold uppercase tracking-wide card__meta" style="color: var(--muted)">Refine results</h2>
+          <button type="button" class="text-sm font-medium text-[var(--brand)]" data-clear-desktop hidden={filterCount === 0 && !query}>
             Clear all
           </button>
         </div>
@@ -147,10 +163,10 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
       </aside>
       <div class="space-y-6" data-results-wrapper>
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <p class="text-sm text-slate-600 dark:text-slate-400" data-result-summary>
+          <p class="text-sm card__meta" data-result-summary>
             Showing {results.length} item{results.length === 1 ? '' : 's'}
           </p>
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" data-filter-summary>
+          <p class="text-xs font-medium uppercase tracking-wide card__meta" data-filter-summary>
             {filterCount > 0 ? `${filterCount} filter${filterCount === 1 ? '' : 's'} active` : 'No filters active'}
           </p>
         </div>
@@ -168,23 +184,25 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
     >
       <div id="mobile-facets-panel" class="absolute inset-y-0 right-0 w-full max-w-xs translate-x-full bg-white p-6 shadow-xl transition-transform duration-200 dark:bg-slate-900" data-facets-drawer-panel tabindex="-1">
         <div class="flex items-center justify-between">
-          <h2 id="mobile-facets-title" class="text-base font-semibold text-slate-900 dark:text-white">Refine results</h2>
-          <button type="button" class="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" data-close-facets>
+          <h2 id="mobile-facets-title" class="text-base font-semibold" style="color: var(--ink)">Refine results</h2>
+          <button type="button" class="rounded-full border border-[var(--line)] px-3 py-1 text-sm" data-close-facets>
             Close
           </button>
         </div>
-        <button type="button" class="mt-4 text-sm font-medium text-primary-600 hover:underline" data-clear-mobile hidden={filterCount === 0 && !query}>
+        <button type="button" class="mt-4 text-sm font-medium text-[var(--brand)]" data-clear-mobile hidden={filterCount === 0 && !query}>
           Clear all
         </button>
         <div class="mt-6 space-y-6" data-facets-mobile></div>
       </div>
     </div>
+    <datalist id="author-options"></datalist>
   </section>
   <script type="module">
     const payloadEl = document.querySelector('[data-search-app]');
     if (payloadEl) {
       const data = JSON.parse(payloadEl.dataset.payload ?? '{}');
       const records = data.index ?? [];
+      const authorOptions = JSON.parse(payloadEl.dataset.authors ?? '[]');
       const searchInput = payloadEl.querySelector('[data-search-input]');
       const resultsRegion = payloadEl.querySelector('[data-results-region]');
       const resultCount = payloadEl.querySelector('[data-result-count]');
@@ -198,13 +216,13 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
       const drawerPanel = payloadEl.querySelector('[data-facets-drawer-panel]');
       const openDrawerButton = payloadEl.querySelector('[data-open-facets]');
       const closeDrawerButton = payloadEl.querySelector('[data-close-facets]');
+      const authorDatalist = payloadEl.querySelector('#author-options');
 
       const fuseOptions = { includeScore: true, threshold: 0.3, ignoreLocation: true, keys: [
-        { name: 'title', weight: 0.5 },
-        { name: 'creators', weight: 0.25 },
+        { name: 'title', weight: 0.55 },
+        { name: 'authors', weight: 0.25 },
         { name: 'subjects', weight: 0.15 },
-        { name: 'collection', weight: 0.05 },
-        { name: 'year', weight: 0.05 }
+        { name: 'collection', weight: 0.05 }
       ] };
 
       const fuse = new (await import('fuse.js')).default(records, fuseOptions);
@@ -213,84 +231,84 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
         ['church fathers', ['patristics']]
       ]);
 
+      const eraOptions = ['Ancient', 'Medieval', 'Renaissance', 'Early Modern', 'Modern', 'Contemporary'];
+
+      if (authorDatalist) {
+        authorDatalist.innerHTML = authorOptions
+          .map((author) => `<option value="${author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}"></option>`)
+          .join('');
+      }
+
       const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
       const state = {
         query: data.query ?? '',
-        filters: { ...{ subjects: [], collection: [], language: [] }, ...data.filters }
+        filters: {
+          subjects: Array.isArray(data.filters?.subjects) ? data.filters.subjects : [],
+          author: data.filters?.author ?? '',
+          era: data.filters?.era ?? ''
+        }
       };
 
       const updateUrl = () => {
         const url = new URL(window.location.href);
         state.query ? url.searchParams.set('q', state.query) : url.searchParams.delete('q');
-        ['subjects', 'collection', 'language'].forEach((facet) => {
-          url.searchParams.delete(facet);
-          state.filters[facet].forEach((value) => url.searchParams.append(facet, value));
-        });
+        url.searchParams.delete('subject');
+        state.filters.subjects.forEach((value) => url.searchParams.append('subject', value));
+        state.filters.author ? url.searchParams.set('author', state.filters.author) : url.searchParams.delete('author');
+        state.filters.era ? url.searchParams.set('era', state.filters.era) : url.searchParams.delete('era');
         window.history.replaceState({}, '', url.toString());
       };
 
-      const renderFacets = () => {
-        const baseHits = runSearch(state.query).map(({ item }) => item);
-        const counts = { subjects: new Map(), collection: new Map(), language: new Map() };
-        baseHits.forEach((record) => {
-          (record.subjects ?? []).forEach((subject) => {
-            counts.subjects.set(subject, (counts.subjects.get(subject) ?? 0) + 1);
-          });
-          if (record.collection) {
-            counts.collection.set(record.collection, (counts.collection.get(record.collection) ?? 0) + 1);
-          }
-          if (record.language) {
-            counts.language.set(record.language, (counts.language.get(record.language) ?? 0) + 1);
-          }
-        });
+      const escapeHtml = (value = '') =>
+        String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
 
-        const renderGroup = (target) => {
-          if (!target) return;
-          target.innerHTML = '';
-          const groups = [
-            ['subjects', 'Subjects'],
-            ['collection', 'Collection'],
-            ['language', 'Language']
-          ];
-          groups.forEach(([facetKey, facetLabel]) => {
-            const entries = Array.from(counts[facetKey].entries()).sort((a, b) => a[0].localeCompare(b[0]));
-            if (!entries.length) return;
-            const section = document.createElement('section');
-            section.className = 'space-y-3';
-            const heading = document.createElement('h3');
-            heading.className = 'text-xs font-semibold uppercase tracking-wide text-slate-500';
-            heading.textContent = facetLabel;
-            section.appendChild(heading);
-            const list = document.createElement('div');
-            list.className = 'flex flex-wrap gap-2';
-            entries.forEach(([value, total]) => {
-              const button = document.createElement('button');
-              button.type = 'button';
-              button.className = 'facet-chip';
-              button.textContent = `${value} (${total})`;
-              button.dataset.facet = facetKey;
-              button.dataset.value = value;
-              if (state.filters[facetKey].includes(value)) {
-                button.classList.add('active');
-              }
-              button.addEventListener('click', () => toggleFacet(facetKey, value));
-              list.appendChild(button);
-            });
-            section.appendChild(list);
-            target.appendChild(section);
-          });
-        };
+      const renderBook = (record) => {
+        const title = escapeHtml(record.title ?? 'Untitled');
+        const permalink = record.permalink?.startsWith('/') ? record.permalink : `/${record.permalink ?? ''}`;
+        const authors = Array.isArray(record.authors)
+          ? record.authors.filter(Boolean)
+          : Array.isArray(record.creators)
+          ? record.creators.filter(Boolean)
+          : [];
+        const year = record.year ?? '';
+        const collection = record.collection ? escapeHtml(record.collection) : '';
+        const subjects = Array.isArray(record.subjects) ? record.subjects.slice(0, 3) : [];
+        const cover = record.coverUrl
+          ? `<img src="${escapeHtml(record.coverUrl)}" alt="Cover of ${title}" loading="lazy" decoding="async" fetchpriority="low" />`
+          : `<div class="book__fallback" aria-hidden="true">${escapeHtml(title.slice(0, 1).toUpperCase())}</div>`;
+        const authorsLine = authors.length
+          ? `${escapeHtml(authors.join(', '))}${year ? '<span class="sep"> · </span>' + escapeHtml(String(year)) : ''}`
+          : year
+          ? `<span class="book__year">${escapeHtml(String(year))}</span>`
+          : '';
+        const tags = subjects
+          .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
+          .join('');
 
-        renderGroup(facetsDesktop);
-        renderGroup(facetsMobile);
-      };
-
-      const toggleFacet = (facet, value) => {
-        const values = new Set(state.filters[facet] ?? []);
-        values.has(value) ? values.delete(value) : values.add(value);
-        state.filters[facet] = Array.from(values);
-        applyState();
+        return `
+          <div role="listitem">
+            <article class="book" role="article">
+              <a class="book__link" href="${escapeHtml(permalink)}" aria-label="Open record: ${title}">
+                <figure class="book__cover">
+                  ${cover}
+                  <span class="book__edge" aria-hidden="true"></span>
+                </figure>
+                <div class="book__meta">
+                  <h3 class="book__title">${title}</h3>
+                  ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
+                  ${collection ? `<p class="card__meta text-sm" style="margin:0 0 0.4rem">${collection}</p>` : ''}
+                  ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+                </div>
+              </a>
+            </article>
+          </div>
+        `;
       };
 
       const expandQuery = (term) => {
@@ -325,17 +343,115 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
           }))
           .filter((record) => {
             const subjectMatch = !state.filters.subjects.length || state.filters.subjects.every((value) => record.subjects?.includes(value));
-            const collectionMatch = !state.filters.collection.length || state.filters.collection.every((value) => record.collection === value);
-            const languageMatch = !state.filters.language.length || state.filters.language.every((value) => record.language === value);
-            return subjectMatch && collectionMatch && languageMatch;
+            const authorPool = Array.isArray(record.authors)
+              ? record.authors
+              : Array.isArray(record.creators)
+              ? record.creators
+              : [];
+            const authorMatch = !state.filters.author || normalize(authorPool.join(' ')).includes(normalize(state.filters.author));
+            const eraMatch = !state.filters.era || record.era === state.filters.era;
+            return subjectMatch && authorMatch && eraMatch;
           })
           .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
       };
 
+      const renderFacets = () => {
+        const baseHits = runSearch(state.query).map(({ item }) => item);
+        const subjectCounts = new Map();
+        baseHits.forEach((record) => {
+          (record.subjects ?? []).forEach((subject) => {
+            subjectCounts.set(subject, (subjectCounts.get(subject) ?? 0) + 1);
+          });
+        });
+
+        const renderTarget = (target) => {
+          if (!target) return;
+          target.innerHTML = '';
+
+          const subjectsSection = document.createElement('section');
+          subjectsSection.className = 'space-y-3';
+          const subjectsHeading = document.createElement('h3');
+          subjectsHeading.className = 'text-xs font-semibold uppercase tracking-wide card__meta';
+          subjectsHeading.textContent = 'Subjects';
+          subjectsSection.appendChild(subjectsHeading);
+          const subjectsList = document.createElement('div');
+          subjectsList.className = 'flex flex-wrap gap-2';
+          Array.from(subjectCounts.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .forEach(([value, count]) => {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'facet-chip';
+              button.textContent = `${value} (${count})`;
+              button.dataset.facet = 'subjects';
+              button.dataset.value = value;
+              if (state.filters.subjects.includes(value)) button.classList.add('active');
+              button.addEventListener('click', () => toggleSubject(value));
+              subjectsList.appendChild(button);
+            });
+          subjectsSection.appendChild(subjectsList);
+          target.appendChild(subjectsSection);
+
+          const authorSection = document.createElement('section');
+          authorSection.className = 'space-y-2';
+          const authorLabel = document.createElement('label');
+          authorLabel.className = 'flex flex-col gap-2';
+          authorLabel.innerHTML = `
+            <span class="text-xs font-semibold uppercase tracking-wide card__meta">Author</span>
+            <input type="text" list="author-options" class="w-full rounded-full border border-[var(--line)] bg-white/90 px-4 py-2 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70" value="${escapeHtml(state.filters.author)}" placeholder="e.g., Augustine" />
+          `;
+          const authorInput = authorLabel.querySelector('input');
+          authorInput?.addEventListener('change', (event) => {
+            state.filters.author = event.target.value.trim();
+            applyState();
+          });
+          authorSection.appendChild(authorLabel);
+          target.appendChild(authorSection);
+
+          const eraSection = document.createElement('section');
+          eraSection.className = 'space-y-2';
+          const eraLabel = document.createElement('label');
+          eraLabel.className = 'flex flex-col gap-2';
+          const select = document.createElement('select');
+          select.className = 'w-full rounded-full border border-[var(--line)] bg-white/90 px-4 py-2 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70';
+          const anyOption = document.createElement('option');
+          anyOption.value = '';
+          anyOption.textContent = 'Any era';
+          select.appendChild(anyOption);
+          eraOptions.forEach((era) => {
+            const option = document.createElement('option');
+            option.value = era;
+            option.textContent = era;
+            if (era === state.filters.era) option.selected = true;
+            select.appendChild(option);
+          });
+          select.addEventListener('change', (event) => {
+            state.filters.era = event.target.value;
+            applyState();
+          });
+          eraLabel.innerHTML = '<span class="text-xs font-semibold uppercase tracking-wide card__meta">Era</span>';
+          eraLabel.appendChild(select);
+          eraSection.appendChild(eraLabel);
+          target.appendChild(eraSection);
+        };
+
+        renderTarget(facetsDesktop);
+        renderTarget(facetsMobile);
+      };
+
+      const toggleSubject = (value) => {
+        const values = new Set(state.filters.subjects ?? []);
+        values.has(value) ? values.delete(value) : values.add(value);
+        state.filters.subjects = Array.from(values);
+        applyState();
+      };
+
+      const runAndFilter = () => applyFilters(runSearch(state.query));
+
       const renderResults = () => {
-        const hits = applyFilters(runSearch(state.query));
+        const hits = runAndFilter();
         const count = hits.length;
-        const filtersActive = state.filters.subjects.length + state.filters.collection.length + state.filters.language.length;
+        const filtersActive = state.filters.subjects.length + (state.filters.author ? 1 : 0) + (state.filters.era ? 1 : 0);
         const summary = filtersActive ? `${filtersActive} filter${filtersActive === 1 ? '' : 's'} active` : 'No filters active';
         if (resultCount) resultCount.textContent = `${count} result${count === 1 ? '' : 's'}`;
         if (resultSummary) resultSummary.textContent = `Showing ${count} item${count === 1 ? '' : 's'}`;
@@ -349,34 +465,14 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
 
         if (resultsRegion) {
           if (!count) {
-            resultsRegion.innerHTML = `<p class="rounded-lg border border-dashed border-slate-300 bg-white/80 p-8 text-center text-sm text-slate-500">No results for “${state.query}”. Try removing filters or explore related subjects.</p>`;
+            resultsRegion.innerHTML = `<p class="card text-center text-sm" style="border-style:dashed;border-color:var(--line);box-shadow:none">No results for “${escapeHtml(state.query)}”. Try removing filters or explore related subjects.</p>`;
           } else {
-            const list = document.createElement('ul');
-            list.setAttribute('role', 'list');
-            list.className = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
-            hits.forEach((record) => {
-              const item = document.createElement('li');
-              item.className = 'h-full';
-              item.innerHTML = `
-                <a href="${record.permalink.startsWith('/') ? record.permalink : '/' + record.permalink}" class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/40">
-                  <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100">
-                    ${record.coverUrl ? `<img src="${record.coverUrl}" alt="Cover of ${record.title}" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />` : `<div class="flex h-full w-full items-center justify-center bg-slate-200 text-sm font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-400">${record.title?.slice(0, 1) ?? ''}</div>`}
-                  </div>
-                  <div class="mt-4 flex flex-1 flex-col justify-between gap-4">
-                    <div class="space-y-2">
-                      <h3 class="text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-200">${record.title}</h3>
-                      ${record.creators?.length ? `<p class="text-sm text-slate-600 dark:text-slate-300">${record.creators.join(', ')}</p>` : ''}
-                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">${record.collection ?? ''} · ${record.year ?? ''}</p>
-                      ${(record.subjects ?? []).length ? `<div class="flex flex-wrap gap-2" role="list">${record.subjects.slice(0, 3).map((subject) => `<span role="listitem" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200">${subject}</span>`).join('')}</div>` : ''}
-                    </div>
-                    ${record.quality ? `<span class="inline-flex w-fit items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">Quality ${record.quality}</span>` : ''}
-                  </div>
-                </a>
-              `;
-              list.appendChild(item);
-            });
+            const grid = document.createElement('div');
+            grid.className = 'results-grid';
+            grid.setAttribute('role', 'list');
+            grid.innerHTML = hits.map((record) => renderBook(record)).join('');
             resultsRegion.innerHTML = '';
-            resultsRegion.appendChild(list);
+            resultsRegion.appendChild(grid);
           }
         }
       };
@@ -389,7 +485,7 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
 
       const clearAll = () => {
         state.query = '';
-        state.filters = { subjects: [], collection: [], language: [] };
+        state.filters = { subjects: [], author: '', era: '' };
         if (searchInput) searchInput.value = '';
         applyState();
       };
@@ -402,58 +498,52 @@ const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c
         };
       };
 
-      const handleQueryChange = debounce(() => {
-        state.query = searchInput.value;
+      const onInput = debounce((event) => {
+        state.query = event.target.value;
         applyState();
       }, 200);
 
-      searchInput?.addEventListener('input', handleQueryChange);
-      clearDesktopButtons.forEach((button) => button.addEventListener('click', clearAll));
+      if (searchInput) {
+        searchInput.addEventListener('input', onInput);
+        searchInput.addEventListener('search', (event) => {
+          state.query = event.target.value;
+          applyState();
+        });
+      }
+
+      [...clearDesktopButtons].forEach((button) => button.addEventListener('click', clearAll));
       clearMobileButton?.addEventListener('click', clearAll);
 
-      const openDrawer = () => {
-        if (!drawer || !drawerPanel) return;
-        drawer.classList.remove('hidden');
-        requestAnimationFrame(() => {
-          drawerPanel.style.transform = 'translateX(0)';
-          drawer.setAttribute('aria-hidden', 'false');
-          openDrawerButton?.setAttribute('aria-expanded', 'true');
-          drawerPanel.focus();
+      if (openDrawerButton && drawer && drawerPanel) {
+        openDrawerButton.addEventListener('click', () => {
+          drawer.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            drawerPanel.style.transform = 'translateX(0)';
+            openDrawerButton.setAttribute('aria-expanded', 'true');
+          });
         });
-      };
+      }
 
       const closeDrawer = () => {
         if (!drawer || !drawerPanel) return;
-        drawerPanel.style.transform = 'translateX(100%)';
-        drawer.setAttribute('aria-hidden', 'true');
+        drawerPanel.style.transform = '';
         openDrawerButton?.setAttribute('aria-expanded', 'false');
-        setTimeout(() => {
-          drawer.classList.add('hidden');
-          openDrawerButton?.focus();
-        }, 200);
+        drawerPanel.addEventListener(
+          'transitionend',
+          () => {
+            drawer.classList.add('hidden');
+          },
+          { once: true }
+        );
       };
-
-      openDrawerButton?.addEventListener('click', () => {
-        if (drawer?.classList.contains('hidden')) {
-          openDrawer();
-        } else {
-          closeDrawer();
-        }
-      });
 
       closeDrawerButton?.addEventListener('click', closeDrawer);
       drawer?.addEventListener('click', (event) => {
         if (event.target === drawer) closeDrawer();
       });
-      drawerPanel?.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          event.preventDefault();
-          closeDrawer();
-        }
-      });
 
-      renderFacets();
       renderResults();
+      renderFacets();
     }
   </script>
 </SearchLayout>

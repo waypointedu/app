@@ -1,71 +1,44 @@
 [
   {
+    "id": "2025-0004",
+    "title": "Persuasion",
+    "authors": [
+      "Jane Austen"
+    ],
+    "creators": [
+      "Jane Austen"
+    ],
+    "year": 1900,
+    "subjects": [
+      "Fiction",
+      "Romance"
+    ],
+    "collection": "Classics",
+    "year": 1891,
+    "era": "Modern",
+    "lang": "en",
+    "quality": "A",
+    "permalink": "/record/2025-0004"
+  },
+  {
     "id": "2025-0003",
     "title": "The Confessions",
+    "authors": [
+      "Augustine of Hippo"
+    ],
     "creators": [
       "Augustine of Hippo"
     ],
-    "year": 1900,
+    "year": 1891,
     "subjects": [
       "Patristics",
       "Autobiography"
     ],
     "collection": "Classics",
-    "language": "en",
-    "type": "Book",
-    "summary": "Augustine's meditation on faith, memory, and conversion in a modernized bilingual edition.",
-    "tags": [
-      "Non-Fiction",
-      "Memoir",
-      "Theology",
-      "Biography"
-    ],
+    "year": 1900,
+    "era": "Modern",
+    "lang": "en",
     "quality": "A",
-    "permalink": "record/2025-0003/",
-    "normalized": {
-      "title": "the confessions",
-      "creators": [
-        "augustine of hippo"
-      ],
-      "subjects": [
-        "patristics",
-        "autobiography"
-      ],
-      "collection": "classics"
-    }
-  },
-  {
-    "id": "2025-0004",
-    "title": "Persuasion",
-    "creators": [
-      "Jane Austen"
-    ],
-    "year": 1891,
-    "subjects": [
-      "Fiction",
-      "Romance"
-    ],
-    "collection": "Classics",
-    "language": "en",
-    "type": "Novel",
-    "summary": "Jane Austen's final completed novel in a reader-friendly critical edition.",
-    "tags": [
-      "Fiction",
-      "Novel",
-      "Romance"
-    ],
-    "quality": "A",
-    "permalink": "record/2025-0004/",
-    "normalized": {
-      "title": "persuasion",
-      "creators": [
-        "jane austen"
-      ],
-      "subjects": [
-        "fiction",
-        "romance"
-      ],
-      "collection": "classics"
-    }
+    "permalink": "/record/2025-0003"
   }
 ]
