@@ -4,12 +4,19 @@ const { minimal = false } = Astro.props as { minimal?: boolean };
 <div class:list={["relative", minimal ? "w-48" : "w-full"]} x-data="searchBox()">
   <input
     type="search"
-    class="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800/80"
+    class="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800/80"
     placeholder="Search the library"
     x-model="query"
     @keydown.enter="go()"
   />
-  <button class="absolute right-1 top-1 rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold text-white" @click="go()">Go</button>
+  <button
+    type="button"
+    class="absolute right-1 top-1 rounded-full bg-primary-500 px-3 py-1 text-xs font-semibold text-white transition hover:bg-primary-600"
+    @click="go()"
+    aria-label="Run search"
+  >
+    Go
+  </button>
 </div>
 <script type="module">
   const searchBox = () => ({

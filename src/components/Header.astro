@@ -1,15 +1,27 @@
 ---
 import SearchBox from './SearchBox.astro';
+
+const pathname = Astro.url.pathname;
+
+const navItems = [
+  { href: '/', label: 'Home' },
+  { href: '/browse', label: 'Browse' },
+  { href: '/search', label: 'Search' },
+  { href: '/policies/collection', label: 'Policies' }
+];
 ---
-<header class="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80">
+<header
+  class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800 dark:bg-slate-950/90"
+  role="banner"
+>
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4">
-    <a href="/" class="text-xl font-semibold tracking-tight">Waypoint Digital Library</a>
-    <nav class="hidden items-center gap-4 text-sm font-medium md:flex">
-      <a href="/browse">Browse</a>
-      <a href="/search">Search</a>
-      <a href="/collections">Collections</a>
-      <a href="/about">About</a>
-      <a href="/policies/collection">Policies</a>
+    <a href="/" class="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">Waypoint Digital Library</a>
+    <nav class="hidden items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-200 md:flex" aria-label="Primary">
+      {navItems.map((item) => (
+        <a class="nav-link" href={item.href} aria-current={pathname === item.href ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
     </nav>
     <div class="flex items-center gap-2">
       <SearchBox minimal={true} />

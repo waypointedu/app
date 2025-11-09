@@ -2,25 +2,146 @@
 import Base from '../layouts/Base.astro';
 import ResultsGrid from '../components/ResultsGrid.astro';
 import records from '../data/new-arrivals.json';
+
+const spotlightSeedData = JSON.stringify(records).replace(/</g, '\\u003c');
+const spotlightFallback = records[0];
 ---
 <Base>
-  <section class="mx-auto max-w-6xl px-6 py-16">
-    <div class="grid gap-8 md:grid-cols-2 md:items-center">
+  <section
+    class="mx-auto max-w-6xl px-6 py-16"
+    x-data="heroSpotlight(JSON.parse($el.dataset.records))"
+    x-init="init()"
+    data-records={spotlightSeedData}
+  >
+    <div class="grid gap-12 md:grid-cols-[minmax(0,1fr)_420px] md:items-start">
       <div class="space-y-6">
-        <p class="text-sm font-semibold uppercase tracking-widest text-primary-500">Waypoint Institute Library Editions</p>
-        <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Scholarly digital editions, fully open.</h1>
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary-500">Waypoint Institute Library Editions</p>
+        <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Scholarly digital editions, fully open.
+        </h1>
         <p class="text-lg text-slate-600 dark:text-slate-300">
           Waypoint Digital Library is a static-first publishing stack for enduring access to humanities texts. Explore curated collections, authoritative metadata, and high-quality EPUB and PDF outputs—all built with Astro and GitHub Actions.
         </p>
-        <div class="flex gap-4">
-          <a href="/browse" class="rounded-full bg-primary-500 px-6 py-3 text-sm font-semibold text-white shadow">Browse Library</a>
-          <a href="/policies/collection" class="rounded-full border border-primary-500 px-6 py-3 text-sm font-semibold text-primary-600">Policies</a>
+        <div class="flex flex-wrap gap-4">
+          <a
+            href="/browse"
+            class="inline-flex items-center gap-2 rounded-full bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow transition hover:bg-primary-500 focus-visible:outline-none"
+          >
+            Enter the reading hall
+          </a>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-primary-500 px-6 py-3 text-sm font-semibold text-primary-700 transition hover:bg-primary-50 dark:border-primary-400 dark:text-primary-200 dark:hover:bg-primary-900/20"
+            @click="next()"
+          >
+            Shuffle spotlight
+          </button>
         </div>
       </div>
-      <div class="rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/70">
-        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">New Arrivals</h2>
-        <ResultsGrid results={records} />
+      <aside
+        class="space-y-6 rounded-3xl border border-slate-200 bg-white/80 p-8 shadow-lg shadow-slate-200/50 transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/30"
+        aria-live="polite"
+      >
+        <p class="text-sm font-semibold uppercase tracking-wide text-primary-500">Spotlight</p>
+        <div class="flex flex-col gap-6 md:flex-col" role="group" aria-roledescription="Featured record">
+          <div class="flex gap-4">
+            <div class="relative h-36 w-28 overflow-hidden rounded-xl bg-slate-200 shadow-inner">
+              <img
+                x-show="current.coverUrl"
+                x-transition
+                src={spotlightFallback?.coverUrl ?? ''}
+                :src="current.coverUrl"
+                :alt="`Cover art for ${current.title}`"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+              <div x-show="!current.coverUrl" class="flex h-full w-full items-center justify-center text-sm font-medium text-slate-500">
+                {spotlightFallback?.title?.slice(0, 1)}
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h2 class="text-2xl font-semibold text-slate-900 dark:text-white" x-text="current.title">
+                {spotlightFallback.title}
+              </h2>
+              <p class="text-sm text-slate-600 dark:text-slate-300" x-text="current.creators.join(', ')">
+                {spotlightFallback.creators?.join(', ')}
+              </p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500" x-text="`${current.collection} · ${current.year}`">
+                {spotlightFallback.collection} · {spotlightFallback.year}
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2" role="list">
+            <template x-for="subject in current.subjects" :key="subject">
+              <span
+                role="listitem"
+                class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                x-text="subject"
+              ></span>
+            </template>
+            <noscript>
+              {spotlightFallback?.subjects?.map((subject) => (
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  {subject}
+                </span>
+              ))}
+            </noscript>
+          </div>
+          <div>
+            <a
+              class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 focus-visible:outline-none dark:bg-slate-100 dark:text-slate-900"
+              href={spotlightFallback?.permalink ?? '#'}
+              :href="current.permalink"
+            >
+              Open record
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="mt-16 space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">New arrivals</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400">Updated as new editions are published.</p>
       </div>
+      <ResultsGrid results={records} />
     </div>
   </section>
+  <script type="module">
+    document.addEventListener('alpine:init', () => {
+      window.heroSpotlight = (records) => ({
+        records,
+        order: [],
+        index: 0,
+        get current() {
+          return this.records[this.order[this.index]] ?? this.records[0] ?? {};
+        },
+        init() {
+          this.order = this.seededOrder();
+          this.index = 0;
+        },
+        seededOrder() {
+          const today = new Date().toISOString().slice(0, 10);
+          let seed = 0;
+          for (const char of today) {
+            seed = (seed * 31 + char.charCodeAt(0)) % 2147483647;
+          }
+          if (seed === 0) seed = 1;
+          const indices = this.records.map((_, idx) => idx);
+          let state = seed;
+          for (let i = indices.length - 1; i > 0; i--) {
+            state = (state * 1103515245 + 12345) % 2147483647;
+            const j = state % (i + 1);
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+          }
+          return indices;
+        },
+        next() {
+          if (!this.records.length) return;
+          this.index = (this.index + 1) % this.records.length;
+        }
+      });
+    });
+  </script>
 </Base>

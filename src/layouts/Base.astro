@@ -15,9 +15,13 @@ const { title = 'Waypoint Digital Library', description = 'Scholarly, open digit
     <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col">
+    <a
+      href="#main-content"
+      class="skip-link absolute left-1/2 top-2 -translate-x-1/2 rounded-full bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow focus-visible:translate-y-0 focus-visible:opacity-100"
+    >Skip to content</a>
     <AnnouncementBar />
     <Header />
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer />
