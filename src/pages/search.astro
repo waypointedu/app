@@ -1,28 +1,459 @@
 ---
 import SearchLayout from '../layouts/Search.astro';
-import SearchBox from '../components/SearchBox.astro';
-import FacetsPanel from '../components/FacetsPanel.astro';
 import ResultsGrid from '../components/ResultsGrid.astro';
+import Fuse from 'fuse.js';
 import index from '../../search/index.json';
-const query = Astro.url.searchParams.get('q') ?? '';
-const results = index.filter((record) =>
-  !query ? true : record.title.toLowerCase().includes(query.toLowerCase())
-);
+
+const url = Astro.url;
+const query = url.searchParams.get('q') ?? '';
+const filters = {
+  subjects: url.searchParams.getAll('subjects'),
+  collection: url.searchParams.getAll('collection'),
+  language: url.searchParams.getAll('language')
+};
+
+const normalize = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const fuseOptions: Fuse.IFuseOptions<any> = {
+  includeScore: true,
+  threshold: 0.3,
+  ignoreLocation: true,
+  keys: [
+    { name: 'title', weight: 0.5 },
+    { name: 'creators', weight: 0.25 },
+    { name: 'subjects', weight: 0.15 },
+    { name: 'collection', weight: 0.05 },
+    { name: 'year', weight: 0.05 }
+  ]
+};
+
+const fuse = new Fuse(index, fuseOptions);
+
+const synonyms = new Map([
+  ['patristics', ['church fathers']],
+  ['church fathers', ['patristics']]
+]);
+
+const expandQuery = (raw: string) => {
+  const normalized = normalize(raw);
+  const extra = synonyms.get(normalized) ?? [];
+  return [raw, ...extra].filter(Boolean);
+};
+
+const runSearch = (term: string) => {
+  const trimmed = term.trim();
+  if (!trimmed) {
+    return index.map((item) => ({ item, score: 0 }));
+  }
+  const expansions = expandQuery(trimmed);
+  const hits = expansions.flatMap((expansion, idx) => {
+    if (!idx) return fuse.search(expansion);
+    return fuse.search(expansion).map((result) => ({ ...result, score: Math.max(result.score ?? 0, 0.15) }));
+  });
+  const byId = new Map<string, { item: any; score: number }>();
+  for (const hit of hits) {
+    const current = byId.get(hit.item.id);
+    const score = Math.min(current?.score ?? Number.MAX_VALUE, hit.score ?? 0);
+    byId.set(hit.item.id, { item: hit.item, score });
+  }
+  return Array.from(byId.values());
+};
+
+const fuseResults = runSearch(query);
+const normalizedQuery = query ? normalize(query) : '';
+
+const applyFilters = (records: { item: any; score: number }[]) =>
+  records
+    .map(({ item, score }) => ({
+      ...item,
+      _score:
+        normalizedQuery && normalize(item.title) === normalizedQuery ? -1 : score ?? 0
+    }))
+    .filter((record) => {
+      const subjectMatch =
+        !filters.subjects.length || filters.subjects.every((subject) => record.subjects?.includes(subject));
+      const collectionMatch =
+        !filters.collection.length || filters.collection.every((value) => record.collection === value);
+      const languageMatch =
+        !filters.language.length || filters.language.every((value) => record.language === value);
+      return subjectMatch && collectionMatch && languageMatch;
+    })
+    .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
+
+const results = applyFilters(fuseResults);
+
+const filterCount = filters.subjects.length + filters.collection.length + filters.language.length;
+
+const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c');
 ---
 <SearchLayout>
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-    <div>
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search</h1>
-      <p class="text-slate-600 dark:text-slate-300">Full-text and metadata search is powered by a prebuilt Fuse.js index.</p>
+  <section
+    class="space-y-10"
+    data-search-app
+    data-payload={payload}
+  >
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary-500">Discover</p>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search the catalogue</h1>
+        <p class="max-w-2xl text-slate-600 dark:text-slate-300">
+          Type a query to search across titles, creators, subjects, and collections. Use the facets to narrow the grid and share the URL to keep state with collaborators.
+        </p>
+      </div>
+      <div class="flex w-full flex-col gap-3 lg:max-w-sm">
+        <div class="relative">
+          <label class="sr-only" for="search-input">Search the library</label>
+          <input
+            id="search-input"
+            type="search"
+            class="w-full rounded-full border border-slate-300 bg-white/80 px-5 py-3 text-base shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-slate-700 dark:bg-slate-800/90"
+            placeholder="Search by title, creator, or subject"
+            autocomplete="off"
+            data-search-input
+            value={query}
+          />
+          <span class="pointer-events-none absolute inset-y-0 right-5 flex items-center text-sm text-slate-400" aria-hidden="true">⌘K</span>
+        </div>
+        <div class="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
+          <span data-result-count>{results.length} result{results.length === 1 ? '' : 's'}</span>
+          <button type="button" class="font-medium text-primary-600 hover:underline" data-clear-desktop hidden={filterCount === 0 && !query}>
+            Clear all
+          </button>
+        </div>
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 focus-visible:outline-none dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 lg:hidden"
+          data-open-facets
+          aria-controls="mobile-facets-panel"
+          aria-expanded="false"
+        >
+          Refine filters
+        </button>
+      </div>
+    </header>
+    <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside class="hidden rounded-2xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80 lg:block" data-facets-desktop-wrapper>
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Refine results</h2>
+          <button type="button" class="text-sm font-medium text-primary-600 hover:underline" data-clear-desktop hidden={filterCount === 0 && !query}>
+            Clear all
+          </button>
+        </div>
+        <div class="mt-6 space-y-6" data-facets-desktop></div>
+      </aside>
+      <div class="space-y-6" data-results-wrapper>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <p class="text-sm text-slate-600 dark:text-slate-400" data-result-summary>
+            Showing {results.length} item{results.length === 1 ? '' : 's'}
+          </p>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400" data-filter-summary>
+            {filterCount > 0 ? `${filterCount} filter${filterCount === 1 ? '' : 's'} active` : 'No filters active'}
+          </p>
+        </div>
+        <div data-results-region aria-live="polite">
+          <ResultsGrid results={results} />
+        </div>
+      </div>
     </div>
-    <div class="w-full max-w-sm">
-      <SearchBox />
+    <div
+      class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mobile-facets-title"
+      data-facets-drawer
+    >
+      <div id="mobile-facets-panel" class="absolute inset-y-0 right-0 w-full max-w-xs translate-x-full bg-white p-6 shadow-xl transition-transform duration-200 dark:bg-slate-900" data-facets-drawer-panel tabindex="-1">
+        <div class="flex items-center justify-between">
+          <h2 id="mobile-facets-title" class="text-base font-semibold text-slate-900 dark:text-white">Refine results</h2>
+          <button type="button" class="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" data-close-facets>
+            Close
+          </button>
+        </div>
+        <button type="button" class="mt-4 text-sm font-medium text-primary-600 hover:underline" data-clear-mobile hidden={filterCount === 0 && !query}>
+          Clear all
+        </button>
+        <div class="mt-6 space-y-6" data-facets-mobile></div>
+      </div>
     </div>
-  </div>
-  <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-    <aside class="rounded-xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80">
-      <FacetsPanel />
-    </aside>
-    <ResultsGrid results={results} />
-  </div>
+  </section>
+  <script type="module">
+    const payloadEl = document.querySelector('[data-search-app]');
+    if (payloadEl) {
+      const data = JSON.parse(payloadEl.dataset.payload ?? '{}');
+      const records = data.index ?? [];
+      const searchInput = payloadEl.querySelector('[data-search-input]');
+      const resultsRegion = payloadEl.querySelector('[data-results-region]');
+      const resultCount = payloadEl.querySelector('[data-result-count]');
+      const resultSummary = payloadEl.querySelector('[data-result-summary]');
+      const filterSummary = payloadEl.querySelector('[data-filter-summary]');
+      const clearDesktopButtons = payloadEl.querySelectorAll('[data-clear-desktop]');
+      const clearMobileButton = payloadEl.querySelector('[data-clear-mobile]');
+      const facetsDesktop = payloadEl.querySelector('[data-facets-desktop]');
+      const facetsMobile = payloadEl.querySelector('[data-facets-mobile]');
+      const drawer = payloadEl.querySelector('[data-facets-drawer]');
+      const drawerPanel = payloadEl.querySelector('[data-facets-drawer-panel]');
+      const openDrawerButton = payloadEl.querySelector('[data-open-facets]');
+      const closeDrawerButton = payloadEl.querySelector('[data-close-facets]');
+
+      const fuseOptions = { includeScore: true, threshold: 0.3, ignoreLocation: true, keys: [
+        { name: 'title', weight: 0.5 },
+        { name: 'creators', weight: 0.25 },
+        { name: 'subjects', weight: 0.15 },
+        { name: 'collection', weight: 0.05 },
+        { name: 'year', weight: 0.05 }
+      ] };
+
+      const fuse = new (await import('fuse.js')).default(records, fuseOptions);
+      const synonyms = new Map([
+        ['patristics', ['church fathers']],
+        ['church fathers', ['patristics']]
+      ]);
+
+      const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      const state = {
+        query: data.query ?? '',
+        filters: { ...{ subjects: [], collection: [], language: [] }, ...data.filters }
+      };
+
+      const updateUrl = () => {
+        const url = new URL(window.location.href);
+        state.query ? url.searchParams.set('q', state.query) : url.searchParams.delete('q');
+        ['subjects', 'collection', 'language'].forEach((facet) => {
+          url.searchParams.delete(facet);
+          state.filters[facet].forEach((value) => url.searchParams.append(facet, value));
+        });
+        window.history.replaceState({}, '', url.toString());
+      };
+
+      const renderFacets = () => {
+        const baseHits = runSearch(state.query).map(({ item }) => item);
+        const counts = { subjects: new Map(), collection: new Map(), language: new Map() };
+        baseHits.forEach((record) => {
+          (record.subjects ?? []).forEach((subject) => {
+            counts.subjects.set(subject, (counts.subjects.get(subject) ?? 0) + 1);
+          });
+          if (record.collection) {
+            counts.collection.set(record.collection, (counts.collection.get(record.collection) ?? 0) + 1);
+          }
+          if (record.language) {
+            counts.language.set(record.language, (counts.language.get(record.language) ?? 0) + 1);
+          }
+        });
+
+        const renderGroup = (target) => {
+          if (!target) return;
+          target.innerHTML = '';
+          const groups = [
+            ['subjects', 'Subjects'],
+            ['collection', 'Collection'],
+            ['language', 'Language']
+          ];
+          groups.forEach(([facetKey, facetLabel]) => {
+            const entries = Array.from(counts[facetKey].entries()).sort((a, b) => a[0].localeCompare(b[0]));
+            if (!entries.length) return;
+            const section = document.createElement('section');
+            section.className = 'space-y-3';
+            const heading = document.createElement('h3');
+            heading.className = 'text-xs font-semibold uppercase tracking-wide text-slate-500';
+            heading.textContent = facetLabel;
+            section.appendChild(heading);
+            const list = document.createElement('div');
+            list.className = 'flex flex-wrap gap-2';
+            entries.forEach(([value, total]) => {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'facet-chip';
+              button.textContent = `${value} (${total})`;
+              button.dataset.facet = facetKey;
+              button.dataset.value = value;
+              if (state.filters[facetKey].includes(value)) {
+                button.classList.add('active');
+              }
+              button.addEventListener('click', () => toggleFacet(facetKey, value));
+              list.appendChild(button);
+            });
+            section.appendChild(list);
+            target.appendChild(section);
+          });
+        };
+
+        renderGroup(facetsDesktop);
+        renderGroup(facetsMobile);
+      };
+
+      const toggleFacet = (facet, value) => {
+        const values = new Set(state.filters[facet] ?? []);
+        values.has(value) ? values.delete(value) : values.add(value);
+        state.filters[facet] = Array.from(values);
+        applyState();
+      };
+
+      const expandQuery = (term) => {
+        const normalized = normalize(term);
+        const extras = synonyms.get(normalized) ?? [];
+        return [term, ...extras];
+      };
+
+      const runSearch = (term) => {
+        const trimmed = term.trim();
+        if (!trimmed) return records.map((item) => ({ item, score: 0 }));
+        const expansions = expandQuery(trimmed);
+        const hits = expansions.flatMap((expansion, idx) => {
+          if (!idx) return fuse.search(expansion);
+          return fuse.search(expansion).map((result) => ({ ...result, score: Math.max(result.score ?? 0, 0.15) }));
+        });
+        const byId = new Map();
+        hits.forEach((hit) => {
+          const existing = byId.get(hit.item.id);
+          const score = Math.min(existing?.score ?? Number.MAX_VALUE, hit.score ?? 0);
+          byId.set(hit.item.id, { item: hit.item, score });
+        });
+        return Array.from(byId.values());
+      };
+
+      const applyFilters = (records) => {
+        const normalizedQuery = state.query ? normalize(state.query) : '';
+        return records
+          .map(({ item, score }) => ({
+            ...item,
+            _score: normalizedQuery && normalize(item.title) === normalizedQuery ? -1 : score ?? 0
+          }))
+          .filter((record) => {
+            const subjectMatch = !state.filters.subjects.length || state.filters.subjects.every((value) => record.subjects?.includes(value));
+            const collectionMatch = !state.filters.collection.length || state.filters.collection.every((value) => record.collection === value);
+            const languageMatch = !state.filters.language.length || state.filters.language.every((value) => record.language === value);
+            return subjectMatch && collectionMatch && languageMatch;
+          })
+          .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
+      };
+
+      const renderResults = () => {
+        const hits = applyFilters(runSearch(state.query));
+        const count = hits.length;
+        const filtersActive = state.filters.subjects.length + state.filters.collection.length + state.filters.language.length;
+        const summary = filtersActive ? `${filtersActive} filter${filtersActive === 1 ? '' : 's'} active` : 'No filters active';
+        if (resultCount) resultCount.textContent = `${count} result${count === 1 ? '' : 's'}`;
+        if (resultSummary) resultSummary.textContent = `Showing ${count} item${count === 1 ? '' : 's'}`;
+        if (filterSummary) filterSummary.textContent = summary;
+        [...clearDesktopButtons].forEach((button) => {
+          button.hidden = filtersActive === 0 && !state.query;
+        });
+        if (clearMobileButton) {
+          clearMobileButton.hidden = filtersActive === 0 && !state.query;
+        }
+
+        if (resultsRegion) {
+          if (!count) {
+            resultsRegion.innerHTML = `<p class="rounded-lg border border-dashed border-slate-300 bg-white/80 p-8 text-center text-sm text-slate-500">No results for “${state.query}”. Try removing filters or explore related subjects.</p>`;
+          } else {
+            const list = document.createElement('ul');
+            list.setAttribute('role', 'list');
+            list.className = 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
+            hits.forEach((record) => {
+              const item = document.createElement('li');
+              item.className = 'h-full';
+              item.innerHTML = `
+                <a href="${record.permalink.startsWith('/') ? record.permalink : '/' + record.permalink}" class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm shadow-slate-200/60 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300 dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/40">
+                  <div class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-slate-100">
+                    ${record.coverUrl ? `<img src="${record.coverUrl}" alt="Cover of ${record.title}" loading="lazy" decoding="async" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />` : `<div class="flex h-full w-full items-center justify-center bg-slate-200 text-sm font-semibold uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-400">${record.title?.slice(0, 1) ?? ''}</div>`}
+                  </div>
+                  <div class="mt-4 flex flex-1 flex-col justify-between gap-4">
+                    <div class="space-y-2">
+                      <h3 class="text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary-600 dark:text-slate-100 dark:group-hover:text-primary-200">${record.title}</h3>
+                      ${record.creators?.length ? `<p class="text-sm text-slate-600 dark:text-slate-300">${record.creators.join(', ')}</p>` : ''}
+                      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">${record.collection ?? ''} · ${record.year ?? ''}</p>
+                      ${(record.subjects ?? []).length ? `<div class="flex flex-wrap gap-2" role="list">${record.subjects.slice(0, 3).map((subject) => `<span role="listitem" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200">${subject}</span>`).join('')}</div>` : ''}
+                    </div>
+                    ${record.quality ? `<span class="inline-flex w-fit items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:bg-primary-900/30 dark:text-primary-200">Quality ${record.quality}</span>` : ''}
+                  </div>
+                </a>
+              `;
+              list.appendChild(item);
+            });
+            resultsRegion.innerHTML = '';
+            resultsRegion.appendChild(list);
+          }
+        }
+      };
+
+      const applyState = () => {
+        updateUrl();
+        renderResults();
+        renderFacets();
+      };
+
+      const clearAll = () => {
+        state.query = '';
+        state.filters = { subjects: [], collection: [], language: [] };
+        if (searchInput) searchInput.value = '';
+        applyState();
+      };
+
+      const debounce = (fn, delay = 200) => {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), delay);
+        };
+      };
+
+      const handleQueryChange = debounce(() => {
+        state.query = searchInput.value;
+        applyState();
+      }, 200);
+
+      searchInput?.addEventListener('input', handleQueryChange);
+      clearDesktopButtons.forEach((button) => button.addEventListener('click', clearAll));
+      clearMobileButton?.addEventListener('click', clearAll);
+
+      const openDrawer = () => {
+        if (!drawer || !drawerPanel) return;
+        drawer.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          drawerPanel.style.transform = 'translateX(0)';
+          drawer.setAttribute('aria-hidden', 'false');
+          openDrawerButton?.setAttribute('aria-expanded', 'true');
+          drawerPanel.focus();
+        });
+      };
+
+      const closeDrawer = () => {
+        if (!drawer || !drawerPanel) return;
+        drawerPanel.style.transform = 'translateX(100%)';
+        drawer.setAttribute('aria-hidden', 'true');
+        openDrawerButton?.setAttribute('aria-expanded', 'false');
+        setTimeout(() => {
+          drawer.classList.add('hidden');
+          openDrawerButton?.focus();
+        }, 200);
+      };
+
+      openDrawerButton?.addEventListener('click', () => {
+        if (drawer?.classList.contains('hidden')) {
+          openDrawer();
+        } else {
+          closeDrawer();
+        }
+      });
+
+      closeDrawerButton?.addEventListener('click', closeDrawer);
+      drawer?.addEventListener('click', (event) => {
+        if (event.target === drawer) closeDrawer();
+      });
+      drawerPanel?.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeDrawer();
+        }
+      });
+
+      renderFacets();
+      renderResults();
+    }
+  </script>
 </SearchLayout>
