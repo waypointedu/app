@@ -10,7 +10,7 @@
       "Patristics",
       "Autobiography"
     ],
-    "collection": "Waypoint Classics",
+    "collection": "Classics",
     "language": "en",
     "type": "Book",
     "summary": "Augustine's meditation on faith, memory, and conversion in a modernized bilingual edition.",
@@ -31,7 +31,7 @@
         "patristics",
         "autobiography"
       ],
-      "collection": "waypoint classics"
+      "collection": "classics"
     }
   },
   {
@@ -45,7 +45,7 @@
       "Fiction",
       "Romance"
     ],
-    "collection": "Waypoint Classics",
+    "collection": "Classics",
     "language": "en",
     "type": "Novel",
     "summary": "Jane Austen's final completed novel in a reader-friendly critical edition.",
@@ -65,7 +65,7 @@
         "fiction",
         "romance"
       ],
-      "collection": "waypoint classics"
+      "collection": "classics"
     }
   }
 ]
