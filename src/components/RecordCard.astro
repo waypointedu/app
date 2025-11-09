@@ -16,13 +16,19 @@ const normalizedPermalink = permalink?.startsWith('/') ? permalink : `/${permali
 const headingId = `record-card-${(normalizedPermalink ?? title ?? 'card').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
 const metaId = `${headingId}-meta`;
 const previewId = `${headingId}-preview`;
-const previewText = abstract ?? summary ?? '';
+const previewSource = abstract ?? summary ?? '';
+const previewText = typeof previewSource === 'string' ? previewSource.trim() : '';
+const hasPreview = previewText.length > 0;
 const displaySubjects = subjects.filter(Boolean).slice(0, 3);
 const displayCreators = Array.isArray(creators) ? creators.filter(Boolean) : [];
 const fallbackInitial = String(title ?? '').trim().slice(0, 1).toUpperCase() || 'W';
 const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · ');
 ---
-<article class="book" data-book-card data-has-preview={previewText ? 'true' : undefined}>
+const previewToggleLabel = hasPreview ? `Show synopsis for ${title}` : undefined;
+const previewReturnLabel = hasPreview ? `Hide synopsis for ${title}` : undefined;
+const peekPrompt = hasPreview ? 'View synopsis' : null;
+---
+<article class="book" data-book-card data-has-preview={hasPreview ? 'true' : undefined}>
   <div class="book__wrapper">
     <div class="book__face book__face--front">
       <a
@@ -33,7 +39,15 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
       >
         <span class="sr-only">Open record: {title}</span>
       </a>
-      <figure class="book__figure">
+      <figure
+        class="book__figure"
+        data-book-toggle={hasPreview ? '' : undefined}
+        role={hasPreview ? 'button' : undefined}
+        tabindex={hasPreview ? 0 : undefined}
+        aria-controls={hasPreview ? previewId : undefined}
+        aria-expanded={hasPreview ? 'false' : undefined}
+        aria-label={previewToggleLabel}
+      >
         {coverUrl ? (
           <img
             src={coverUrl}
@@ -46,6 +60,7 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
           <div class="book__fallback" aria-hidden="true">{fallbackInitial}</div>
         )}
         <span class="book__edge" aria-hidden="true"></span>
+        {peekPrompt ? <span class="book__peek" aria-hidden="true">{peekPrompt}</span> : null}
       </figure>
       <div class="book__info">
         <h3 id={headingId} class="book__title">{title}</h3>
@@ -71,7 +86,7 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
         ) : (
           <span class="card__meta text-xs" style="opacity: 0.7">Digital edition</span>
         )}
-        {previewText ? (
+        {hasPreview ? (
           <button
             type="button"
             class="book__preview-button"
@@ -79,6 +94,7 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
             aria-haspopup="true"
             aria-expanded="false"
             aria-controls={previewId}
+            aria-label={previewToggleLabel}
           >
             Preview
           </button>
@@ -87,7 +103,7 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
         )}
       </div>
     </div>
-    {previewText ? (
+    {hasPreview ? (
       <div class="book__face book__face--back" id={previewId} role="region" aria-labelledby={`${headingId}-preview-title`}>
         <header>
           <h3 id={`${headingId}-preview-title`}>{title}</h3>
@@ -105,6 +121,7 @@ const authorLine = [displayCreators.join(', '), year].filter(Boolean).join(' · 
             data-book-toggle
             aria-expanded="true"
             aria-controls={previewId}
+            aria-label={previewReturnLabel}
           >
             Return to cover
           </button>

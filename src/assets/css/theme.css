@@ -1,76 +1,74 @@
 /* Waypoint Institute Library theme tokens */
 :root {
-  --bg: #f4f7fc;
+  --bg: #f5f7fb;
   --panel: #ffffff;
-  --ink: #14264a;
-  --muted: #4a5d7a;
-  --line: #d2dbea;
+  --ink: #12274b;
+  --muted: #4a5d7c;
+  --line: #ccd7ea;
 
   --brand: #0f3e7c;
   --brand-500: #1f5ea8;
   --brand-600: #0b2f5f;
-  --brand-50: #f0f5ff;
-  --brand-100: #e2ecfb;
-  --brand-200: #c5d8f7;
+  --brand-50: #f3f6ff;
+  --brand-100: #e3ecfb;
+  --brand-200: #c2d7f5;
 
-  --accent: #1c4f94;
-  --accent-soft: #e4edfb;
-  --focus-ring: rgba(15, 62, 124, 0.3);
+  --accent: #1b4f94;
+  --accent-soft: rgba(27, 79, 148, 0.14);
+  --focus-ring: rgba(15, 62, 124, 0.32);
 
   --header-gradient: linear-gradient(120deg, #0b2f5f 0%, #15417c 55%, #1f5ea8 100%);
-  --hero-stone: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45) 0, rgba(255, 255, 255, 0) 65%),
-    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.28) 0, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(180deg, rgba(241, 245, 255, 0.92), rgba(233, 239, 251, 0.85));
+  --hero-stone: radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.5) 0, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(circle at 80% 12%, rgba(255, 255, 255, 0.3) 0, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, rgba(239, 244, 255, 0.95), rgba(229, 236, 250, 0.88));
 
   --book-edge: #d8dfef;
-  --book-shadow: rgba(12, 35, 74, 0.18);
-  --book-shadow-strong: rgba(12, 35, 74, 0.3);
+  --book-shadow: rgba(12, 35, 74, 0.16);
+  --book-shadow-strong: rgba(12, 35, 74, 0.28);
 
   --radius: 18px;
   --radius-lg: 22px;
   --radius-pill: 999px;
-  --shadow: 0 18px 36px rgba(12, 35, 74, 0.08);
-  --shadow-soft: 0 12px 28px rgba(12, 35, 74, 0.06);
-  --shadow-strong: 0 26px 42px rgba(12, 35, 74, 0.14);
+  --shadow: 0 16px 32px rgba(12, 35, 74, 0.08);
+  --shadow-soft: 0 12px 26px rgba(12, 35, 74, 0.06);
+  --shadow-strong: 0 26px 40px rgba(12, 35, 74, 0.12);
 
-  --shelf-wood-light: #ede2d2;
-  --shelf-wood-dark: #d9c6a9;
-  --shelf-shadow: rgba(13, 27, 56, 0.12);
+  --shelf-surface: linear-gradient(180deg, rgba(227, 236, 250, 0.9), rgba(210, 224, 245, 0.92));
+  --shelf-shadow: rgba(9, 24, 52, 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #090f1d;
+    --bg: #091124;
     --panel: #0f172a;
-    --ink: #e2e8f8;
-    --muted: #9aa7c3;
-    --line: #1c263b;
+    --ink: #e2e9f8;
+    --muted: #95a6c5;
+    --line: #1b2740;
 
     --brand: #6fa6ff;
     --brand-500: #88b5ff;
     --brand-600: #b6cbff;
     --brand-50: #101d32;
-    --brand-100: #16233b;
-    --brand-200: #20334f;
+    --brand-100: #17243d;
+    --brand-200: #223452;
 
     --accent: #7da7ff;
-    --accent-soft: rgba(111, 166, 255, 0.18);
-    --focus-ring: rgba(139, 183, 255, 0.4);
+    --accent-soft: rgba(111, 166, 255, 0.22);
+    --focus-ring: rgba(130, 178, 255, 0.38);
 
-    --header-gradient: linear-gradient(130deg, #071126 0%, #0f2347 55%, #17386e 100%);
-    --hero-stone: linear-gradient(180deg, rgba(18, 30, 50, 0.9), rgba(10, 17, 34, 0.92));
+    --header-gradient: linear-gradient(130deg, #081226 0%, #102349 55%, #16376c 100%);
+    --hero-stone: linear-gradient(180deg, rgba(18, 30, 50, 0.92), rgba(12, 21, 38, 0.94));
 
     --book-edge: #1f2b40;
     --book-shadow: rgba(0, 0, 0, 0.45);
     --book-shadow-strong: rgba(0, 0, 0, 0.6);
 
-    --shadow: 0 18px 38px rgba(0, 0, 0, 0.35);
+    --shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
     --shadow-soft: 0 14px 30px rgba(0, 0, 0, 0.28);
     --shadow-strong: 0 28px 46px rgba(0, 0, 0, 0.5);
 
-    --shelf-wood-light: #2c2014;
-    --shelf-wood-dark: #25180c;
-    --shelf-shadow: rgba(0, 0, 0, 0.55);
+    --shelf-surface: linear-gradient(180deg, rgba(20, 30, 52, 0.88), rgba(17, 26, 44, 0.92));
+    --shelf-shadow: rgba(0, 0, 0, 0.45);
   }
 }
 

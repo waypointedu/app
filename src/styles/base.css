@@ -378,12 +378,23 @@ textarea:focus-visible {
 
 .book__figure {
   position: relative;
+  z-index: 2;
   width: 100%;
   aspect-ratio: 3 / 4;
   border-radius: 10px;
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(12, 35, 74, 0.06);
   background: linear-gradient(160deg, var(--brand-50), rgba(255, 255, 255, 0.96));
+}
+
+.book__figure[data-book-toggle] {
+  cursor: pointer;
+}
+
+.book__figure[data-book-toggle]:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px var(--focus-ring), inset 0 0 0 1px rgba(12, 35, 74, 0.08);
 }
 
 .book__figure img {
@@ -403,6 +414,22 @@ textarea:focus-visible {
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0));
   opacity: 0.6;
   pointer-events: none;
+}
+
+.book__peek {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  background: linear-gradient(180deg, rgba(15, 62, 124, 0), rgba(15, 62, 124, 0.72));
+  color: #f5f8ff;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .book__fallback {
@@ -589,9 +616,9 @@ textarea:focus-visible {
   overflow-x: auto;
   padding: 1.5rem 1rem 2.8rem;
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--shelf-wood-light) 85%, #fff 15%), var(--shelf-wood-dark));
-  border: 1px solid color-mix(in srgb, var(--line) 65%, transparent);
-  box-shadow: inset 0 -24px 34px var(--shelf-shadow);
+  background: var(--shelf-surface);
+  border: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  box-shadow: inset 0 -18px 28px var(--shelf-shadow);
   scroll-snap-type: x mandatory;
 }
 

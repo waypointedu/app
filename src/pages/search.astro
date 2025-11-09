@@ -298,15 +298,21 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
         const tags = subjects
           .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
           .join('');
-        const abstract = record.abstract ?? record.summary ?? '';
-        const preview = abstract ? escapeHtml(abstract) : '';
+        const rawPreview = (() => {
+          const source = record.abstract ?? record.summary ?? '';
+          return typeof source === 'string' ? source.trim() : '';
+        })();
+        const preview = rawPreview ? escapeHtml(rawPreview) : '';
         const hasPreview = preview.length > 0;
         const quality = record.quality ?? record.quality_grade ?? '';
         const qualityChip = quality
           ? `<span class="chip" aria-label="Quality grade ${escapeHtml(String(quality))}">Quality ${escapeHtml(String(quality))}</span>`
           : '<span class="card__meta text-xs" style="opacity:0.7">Digital edition</span>';
+        const toggleLabel = hasPreview ? `Show synopsis for ${title}` : '';
+        const returnLabel = hasPreview ? `Hide synopsis for ${title}` : '';
+        const peekPrompt = hasPreview ? '<span class="book__peek" aria-hidden="true">View synopsis</span>' : '';
         const previewControl = hasPreview
-          ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}">Preview</button>`
+          ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}" aria-label="${toggleLabel}">Preview</button>`
           : '<span class="card__meta text-xs" style="opacity:0.8">Open for full details</span>';
 
         return `
@@ -317,9 +323,10 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
                   <a class="book__stretched" href="${escapeHtml(permalink)}" aria-labelledby="${cardId}" aria-describedby="${metaId}">
                     <span class="sr-only">Open record: ${title}</span>
                   </a>
-                  <figure class="book__figure">
+                  <figure class="book__figure"${hasPreview ? ` data-book-toggle role="button" tabindex="0" aria-controls="${previewId}" aria-expanded="false" aria-label="${toggleLabel}"` : ''}>
                     ${cover}
                     <span class="book__edge" aria-hidden="true"></span>
+                    ${peekPrompt}
                   </figure>
                   <div class="book__info">
                     <h3 id="${cardId}" class="book__title">${title}</h3>
@@ -342,7 +349,7 @@ const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
                   <p class="book__summary" tabindex="-1">${preview}</p>
                   <div class="book__actions">
                     <a class="button" href="${escapeHtml(permalink)}">Open record</a>
-                    <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}">Return to cover</button>
+                    <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}" aria-label="${returnLabel}">Return to cover</button>
                   </div>
                 </div>
                 ` : ''}

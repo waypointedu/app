@@ -46,16 +46,22 @@ const { title = 'Waypoint Digital Library', description = 'Scholarly, open digit
           const summary = back?.querySelector('.book__summary');
           if (summary instanceof HTMLElement) summary.focus();
         };
-        toggles.forEach((button) => {
-          button.addEventListener('click', (event) => {
+        const activate = (event) => {
+          if (event instanceof KeyboardEvent) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
             event.preventDefault();
-            const flipped = card.hasAttribute('data-flipped');
-            setState(!flipped);
-            if (!flipped) {
-              const summary = back?.querySelector('.book__summary');
-              if (summary instanceof HTMLElement) summary.focus();
-            }
-          });
+          } else {
+            event.preventDefault();
+          }
+          const flipped = card.hasAttribute('data-flipped');
+          setState(!flipped);
+        };
+
+        toggles.forEach((toggle) => {
+          toggle.addEventListener('click', activate);
+          if (!(toggle instanceof HTMLButtonElement)) {
+            toggle.addEventListener('keydown', activate);
+          }
         });
         card.addEventListener('keydown', (event) => {
           if (event.key === 'Escape' && card.hasAttribute('data-flipped')) {
