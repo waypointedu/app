@@ -5,19 +5,34 @@ const recordsDir = join(process.cwd(), '_records');
 const files = await fs.readdir(recordsDir);
 const entries = [];
 
+const computeEra = (input) => {
+  const year = Number.parseInt(input, 10);
+  if (!Number.isFinite(year)) return null;
+  if (year <= 500) return 'Ancient';
+  if (year <= 1500) return 'Medieval';
+  if (year <= 1650) return 'Renaissance';
+  if (year <= 1800) return 'Early Modern';
+  if (year <= 1945) return 'Modern';
+  return 'Contemporary';
+};
+
 for (const file of files) {
   if (extname(file) !== '.json') continue;
   const filepath = join(recordsDir, file);
   const data = JSON.parse(await fs.readFile(filepath, 'utf8'));
+  const year = data.original_date ?? data.date ?? null;
   entries.push({
     id: data.record_id,
     title: data.title,
+    authors: data.creators ?? [],
     creators: data.creators ?? [],
     subjects: data.subjects ?? [],
     collection: data.collection ?? null,
-    year: data.date ?? null,
+    year,
+    era: computeEra(year),
     lang: data.language ?? null,
     quality: data.quality_grade ?? null,
+    abstract: data.abstract ?? null,
     permalink: data.identifiers?.permalink ?? `/record/${data.record_id}`
   });
 }

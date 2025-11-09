@@ -1,28 +1,598 @@
 ---
 import SearchLayout from '../layouts/Search.astro';
-import SearchBox from '../components/SearchBox.astro';
-import FacetsPanel from '../components/FacetsPanel.astro';
 import ResultsGrid from '../components/ResultsGrid.astro';
+import Fuse from 'fuse.js';
 import index from '../../search/index.json';
-const query = Astro.url.searchParams.get('q') ?? '';
-const results = index.filter((record) =>
-  !query ? true : record.title.toLowerCase().includes(query.toLowerCase())
-);
+
+const url = Astro.url;
+const query = url.searchParams.get('q') ?? '';
+const filters = {
+  subjects: url.searchParams.getAll('subject'),
+  author: url.searchParams.get('author') ?? '',
+  era: url.searchParams.get('era') ?? ''
+};
+
+const eraOptions = ['Ancient', 'Medieval', 'Renaissance', 'Early Modern', 'Modern', 'Contemporary'];
+
+const normalize = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+const fuseOptions: Fuse.IFuseOptions<any> = {
+  includeScore: true,
+  threshold: 0.3,
+  ignoreLocation: true,
+  keys: [
+    { name: 'title', weight: 0.55 },
+    { name: 'authors', weight: 0.25 },
+    { name: 'subjects', weight: 0.15 },
+    { name: 'collection', weight: 0.05 }
+  ]
+};
+
+const fuse = new Fuse(index, fuseOptions);
+
+const synonyms = new Map([
+  ['patristics', ['church fathers']],
+  ['church fathers', ['patristics']]
+]);
+
+const expandQuery = (raw: string) => {
+  const normalized = normalize(raw);
+  const extra = synonyms.get(normalized) ?? [];
+  return [raw, ...extra].filter(Boolean);
+};
+
+const runSearch = (term: string) => {
+  const trimmed = term.trim();
+  if (!trimmed) {
+    return index.map((item) => ({ item, score: 0 }));
+  }
+  const expansions = expandQuery(trimmed);
+  const hits = expansions.flatMap((expansion, idx) => {
+    if (!idx) return fuse.search(expansion);
+    return fuse.search(expansion).map((result) => ({ ...result, score: Math.max(result.score ?? 0, 0.15) }));
+  });
+  const byId = new Map<string, { item: any; score: number }>();
+  for (const hit of hits) {
+    const current = byId.get(hit.item.id);
+    const score = Math.min(current?.score ?? Number.MAX_VALUE, hit.score ?? 0);
+    byId.set(hit.item.id, { item: hit.item, score });
+  }
+  return Array.from(byId.values());
+};
+
+const fuseResults = runSearch(query);
+const normalizedQuery = query ? normalize(query) : '';
+
+const applyFilters = (records: { item: any; score: number }[]) =>
+  records
+    .map(({ item, score }) => ({
+      ...item,
+      _score:
+        normalizedQuery && normalize(item.title) === normalizedQuery ? -1 : score ?? 0
+    }))
+    .filter((record) => {
+      const subjectMatch =
+        !filters.subjects.length || filters.subjects.every((subject) => record.subjects?.includes(subject));
+      const authorMatch =
+        !filters.author || normalize((record.authors ?? record.creators ?? []).join(' ')).includes(normalize(filters.author));
+      const eraMatch = !filters.era || record.era === filters.era;
+      return subjectMatch && authorMatch && eraMatch;
+    })
+    .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
+
+const results = applyFilters(fuseResults);
+
+const filterCount = filters.subjects.length + (filters.author ? 1 : 0) + (filters.era ? 1 : 0);
+
+const payload = JSON.stringify({ index, query, filters }).replace(/</g, '\\u003c');
+const authorOptions = Array.from(
+  new Set(
+    index.flatMap((record: any) =>
+      Array.isArray(record.authors)
+        ? record.authors
+        : Array.isArray(record.creators)
+        ? record.creators
+        : []
+    )
+  )
+)
+  .filter(Boolean)
+  .sort((a, b) => String(a).localeCompare(String(b)));
+const authorsPayload = JSON.stringify(authorOptions).replace(/</g, '\\u003c');
 ---
 <SearchLayout>
-  <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-    <div>
-      <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Search</h1>
-      <p class="text-slate-600 dark:text-slate-300">Full-text and metadata search is powered by a prebuilt Fuse.js index.</p>
+  <section
+    class="space-y-10"
+    data-search-app
+    data-payload={payload}
+    data-authors={authorsPayload}
+  >
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div class="space-y-2">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em]" style="color: var(--brand)">Waypoint Institute Library</p>
+        <h1 class="text-3xl font-bold tracking-tight" style="color: var(--ink)">Catalogue of record</h1>
+        <p class="max-w-2xl hero__lede">
+          Survey the Institute&#39;s edited holdings by title, author, subject, or era. Filters persist in the URL so faculty and
+          students can cite or revisit the exact shelf they need.
+        </p>
+      </div>
+      <div class="flex w-full flex-col gap-3 lg:max-w-sm">
+        <div class="relative">
+          <label class="sr-only" for="search-input">Search the library</label>
+          <input
+            id="search-input"
+            type="search"
+            class="w-full rounded-full border border-[var(--line)] bg-white/90 px-5 py-3 text-base shadow-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70"
+            placeholder="Search by title, author, or subject"
+            autocomplete="off"
+            data-search-input
+            value={query}
+          />
+          <span class="pointer-events-none absolute inset-y-0 right-5 flex items-center text-sm text-slate-400" aria-hidden="true">⌘K</span>
+        </div>
+      </div>
+    </header>
+    <div class="flex items-center justify-between text-sm card__meta">
+      <span data-result-count>{results.length} result{results.length === 1 ? '' : 's'}</span>
+      <button type="button" class="font-medium text-[var(--brand)]" data-clear-desktop hidden={filterCount === 0 && !query}>
+        Clear all
+      </button>
     </div>
-    <div class="w-full max-w-sm">
-      <SearchBox />
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-[var(--brand-100)] focus-visible:outline-none lg:hidden"
+      data-open-facets
+      aria-controls="mobile-facets-panel"
+      aria-expanded="false"
+    >
+      Refine filters
+    </button>
+    <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <aside class="hidden rounded-2xl border border-[var(--line)] bg-white/80 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80 lg:block" data-facets-desktop-wrapper>
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-semibold uppercase tracking-wide card__meta" style="color: var(--muted)">Refine results</h2>
+          <button type="button" class="text-sm font-medium text-[var(--brand)]" data-clear-desktop hidden={filterCount === 0 && !query}>
+            Clear all
+          </button>
+        </div>
+        <div class="mt-6 space-y-6" data-facets-desktop></div>
+      </aside>
+      <div class="space-y-6" data-results-wrapper>
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <p class="text-sm card__meta" data-result-summary>
+            Showing {results.length} item{results.length === 1 ? '' : 's'}
+          </p>
+          <p class="text-xs font-medium uppercase tracking-wide card__meta" data-filter-summary>
+            {filterCount > 0 ? `${filterCount} filter${filterCount === 1 ? '' : 's'} active` : 'No filters active'}
+          </p>
+        </div>
+        <div data-results-region aria-live="polite">
+          <ResultsGrid results={results} />
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="grid gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-    <aside class="rounded-xl border border-slate-200 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/80">
-      <FacetsPanel />
-    </aside>
-    <ResultsGrid results={results} />
-  </div>
+    <div
+      class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mobile-facets-title"
+      data-facets-drawer
+    >
+      <div id="mobile-facets-panel" class="absolute inset-y-0 right-0 w-full max-w-xs translate-x-full bg-white p-6 shadow-xl transition-transform duration-200 dark:bg-slate-900" data-facets-drawer-panel tabindex="-1">
+        <div class="flex items-center justify-between">
+          <h2 id="mobile-facets-title" class="text-base font-semibold" style="color: var(--ink)">Refine results</h2>
+          <button type="button" class="rounded-full border border-[var(--line)] px-3 py-1 text-sm" data-close-facets>
+            Close
+          </button>
+        </div>
+        <button type="button" class="mt-4 text-sm font-medium text-[var(--brand)]" data-clear-mobile hidden={filterCount === 0 && !query}>
+          Clear all
+        </button>
+        <div class="mt-6 space-y-6" data-facets-mobile></div>
+      </div>
+    </div>
+    <datalist id="author-options"></datalist>
+  </section>
+  <script type="module">
+    const payloadEl = document.querySelector('[data-search-app]');
+    if (payloadEl) {
+      const data = JSON.parse(payloadEl.dataset.payload ?? '{}');
+      const records = data.index ?? [];
+      const authorOptions = JSON.parse(payloadEl.dataset.authors ?? '[]');
+      const searchInput = payloadEl.querySelector('[data-search-input]');
+      const resultsRegion = payloadEl.querySelector('[data-results-region]');
+      const resultCount = payloadEl.querySelector('[data-result-count]');
+      const resultSummary = payloadEl.querySelector('[data-result-summary]');
+      const filterSummary = payloadEl.querySelector('[data-filter-summary]');
+      const clearDesktopButtons = payloadEl.querySelectorAll('[data-clear-desktop]');
+      const clearMobileButton = payloadEl.querySelector('[data-clear-mobile]');
+      const facetsDesktop = payloadEl.querySelector('[data-facets-desktop]');
+      const facetsMobile = payloadEl.querySelector('[data-facets-mobile]');
+      const drawer = payloadEl.querySelector('[data-facets-drawer]');
+      const drawerPanel = payloadEl.querySelector('[data-facets-drawer-panel]');
+      const openDrawerButton = payloadEl.querySelector('[data-open-facets]');
+      const closeDrawerButton = payloadEl.querySelector('[data-close-facets]');
+      const authorDatalist = payloadEl.querySelector('#author-options');
+
+      const fuseOptions = { includeScore: true, threshold: 0.3, ignoreLocation: true, keys: [
+        { name: 'title', weight: 0.55 },
+        { name: 'authors', weight: 0.25 },
+        { name: 'subjects', weight: 0.15 },
+        { name: 'collection', weight: 0.05 }
+      ] };
+
+      const fuse = new (await import('fuse.js')).default(records, fuseOptions);
+      const synonyms = new Map([
+        ['patristics', ['church fathers']],
+        ['church fathers', ['patristics']]
+      ]);
+
+      const eraOptions = ['Ancient', 'Medieval', 'Renaissance', 'Early Modern', 'Modern', 'Contemporary'];
+
+      if (authorDatalist) {
+        authorDatalist.innerHTML = authorOptions
+          .map((author) => `<option value="${author.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}"></option>`)
+          .join('');
+      }
+
+      const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+      const state = {
+        query: data.query ?? '',
+        filters: {
+          subjects: Array.isArray(data.filters?.subjects) ? data.filters.subjects : [],
+          author: data.filters?.author ?? '',
+          era: data.filters?.era ?? ''
+        }
+      };
+
+      const updateUrl = () => {
+        const url = new URL(window.location.href);
+        state.query ? url.searchParams.set('q', state.query) : url.searchParams.delete('q');
+        url.searchParams.delete('subject');
+        state.filters.subjects.forEach((value) => url.searchParams.append('subject', value));
+        state.filters.author ? url.searchParams.set('author', state.filters.author) : url.searchParams.delete('author');
+        state.filters.era ? url.searchParams.set('era', state.filters.era) : url.searchParams.delete('era');
+        window.history.replaceState({}, '', url.toString());
+      };
+
+      const escapeHtml = (value = '') =>
+        String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+
+      const renderBook = (record) => {
+        const title = escapeHtml(record.title ?? 'Untitled');
+        const safeId = (record.id ?? record.record_id ?? record.permalink ?? title)
+          .toString()
+          .replace(/[^a-z0-9]+/gi, '-')
+          .toLowerCase();
+        const cardId = `book-${safeId}`;
+        const metaId = `${cardId}-meta`;
+        const previewId = `${cardId}-preview`;
+        const previewTitleId = `${cardId}-preview-title`;
+        const permalink = record.permalink?.startsWith('/') ? record.permalink : `/${record.permalink ?? ''}`;
+        const authors = Array.isArray(record.authors)
+          ? record.authors.filter(Boolean)
+          : Array.isArray(record.creators)
+          ? record.creators.filter(Boolean)
+          : [];
+        const year = record.year ?? '';
+        const collection = record.collection ? escapeHtml(record.collection) : '';
+        const subjects = Array.isArray(record.subjects) ? record.subjects.slice(0, 3) : [];
+        const cover = record.coverUrl
+          ? `<img src="${escapeHtml(record.coverUrl)}" alt="Cover of ${title}" loading="lazy" decoding="async" fetchpriority="low" />`
+          : `<div class="book__fallback" aria-hidden="true">${escapeHtml(title.slice(0, 1).toUpperCase())}</div>`;
+        const authorsLine = authors.length
+          ? `${escapeHtml(authors.join(', '))}${year ? '<span class="sep"> · </span>' + escapeHtml(String(year)) : ''}`
+          : year
+          ? `<span class="book__year">${escapeHtml(String(year))}</span>`
+          : '';
+        const tags = subjects
+          .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
+          .join('');
+        const rawPreview = (() => {
+          const source = record.abstract ?? record.summary ?? '';
+          return typeof source === 'string' ? source.trim() : '';
+        })();
+        const preview = rawPreview ? escapeHtml(rawPreview) : '';
+        const hasPreview = preview.length > 0;
+        const quality = record.quality ?? record.quality_grade ?? '';
+        const qualityChip = quality
+          ? `<span class="chip" aria-label="Quality grade ${escapeHtml(String(quality))}">Quality ${escapeHtml(String(quality))}</span>`
+          : '<span class="card__meta text-xs" style="opacity:0.7">Digital edition</span>';
+        const toggleLabel = hasPreview ? `Show synopsis for ${title}` : '';
+        const returnLabel = hasPreview ? `Hide synopsis for ${title}` : '';
+        const peekPrompt = hasPreview ? '<span class="book__peek" aria-hidden="true">View synopsis</span>' : '';
+        const previewControl = hasPreview
+          ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}" aria-label="${toggleLabel}">Preview</button>`
+          : '<span class="card__meta text-xs" style="opacity:0.8">Open for full details</span>';
+
+        return `
+          <div role="listitem">
+            <article class="book" role="article" data-book-card${hasPreview ? ' data-has-preview="true"' : ''}>
+              <div class="book__wrapper">
+                <div class="book__face book__face--front">
+                  <a class="book__stretched" href="${escapeHtml(permalink)}" aria-labelledby="${cardId}" aria-describedby="${metaId}">
+                    <span class="sr-only">Open record: ${title}</span>
+                  </a>
+                  <figure class="book__figure"${hasPreview ? ` data-book-toggle role="button" tabindex="0" aria-controls="${previewId}" aria-expanded="false" aria-label="${toggleLabel}"` : ''}>
+                    ${cover}
+                    <span class="book__edge" aria-hidden="true"></span>
+                    ${peekPrompt}
+                  </figure>
+                  <div class="book__info">
+                    <h3 id="${cardId}" class="book__title">${title}</h3>
+                    ${authorsLine ? `<p class="book__author" id="${metaId}">${authorsLine}</p>` : ''}
+                    ${collection ? `<p class="card__meta text-xs uppercase tracking-[0.2em]" style="margin:0; letter-spacing:0.22em">${collection}</p>` : ''}
+                    ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+                  </div>
+                  <div class="book__footer">
+                    ${qualityChip}
+                    ${previewControl}
+                  </div>
+                </div>
+                ${hasPreview ? `
+                <div class="book__face book__face--back" id="${previewId}" role="region" aria-labelledby="${previewTitleId}">
+                  <header>
+                    <h3 id="${previewTitleId}">${title}</h3>
+                    ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
+                    ${collection ? `<span class="chip" style="width:fit-content">${collection}</span>` : ''}
+                  </header>
+                  <p class="book__summary" tabindex="-1">${preview}</p>
+                  <div class="book__actions">
+                    <a class="button" href="${escapeHtml(permalink)}">Open record</a>
+                    <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}" aria-label="${returnLabel}">Return to cover</button>
+                  </div>
+                </div>
+                ` : ''}
+              </div>
+            </article>
+          </div>
+        `;
+      };
+
+      const expandQuery = (term) => {
+        const normalized = normalize(term);
+        const extras = synonyms.get(normalized) ?? [];
+        return [term, ...extras];
+      };
+
+      const runSearch = (term) => {
+        const trimmed = term.trim();
+        if (!trimmed) return records.map((item) => ({ item, score: 0 }));
+        const expansions = expandQuery(trimmed);
+        const hits = expansions.flatMap((expansion, idx) => {
+          if (!idx) return fuse.search(expansion);
+          return fuse.search(expansion).map((result) => ({ ...result, score: Math.max(result.score ?? 0, 0.15) }));
+        });
+        const byId = new Map();
+        hits.forEach((hit) => {
+          const existing = byId.get(hit.item.id);
+          const score = Math.min(existing?.score ?? Number.MAX_VALUE, hit.score ?? 0);
+          byId.set(hit.item.id, { item: hit.item, score });
+        });
+        return Array.from(byId.values());
+      };
+
+      const applyFilters = (records) => {
+        const normalizedQuery = state.query ? normalize(state.query) : '';
+        return records
+          .map(({ item, score }) => ({
+            ...item,
+            _score: normalizedQuery && normalize(item.title) === normalizedQuery ? -1 : score ?? 0
+          }))
+          .filter((record) => {
+            const subjectMatch = !state.filters.subjects.length || state.filters.subjects.every((value) => record.subjects?.includes(value));
+            const authorPool = Array.isArray(record.authors)
+              ? record.authors
+              : Array.isArray(record.creators)
+              ? record.creators
+              : [];
+            const authorMatch = !state.filters.author || normalize(authorPool.join(' ')).includes(normalize(state.filters.author));
+            const eraMatch = !state.filters.era || record.era === state.filters.era;
+            return subjectMatch && authorMatch && eraMatch;
+          })
+          .sort((a, b) => a._score - b._score || a.title.localeCompare(b.title));
+      };
+
+      const renderFacets = () => {
+        const baseHits = runSearch(state.query).map(({ item }) => item);
+        const subjectCounts = new Map();
+        baseHits.forEach((record) => {
+          (record.subjects ?? []).forEach((subject) => {
+            subjectCounts.set(subject, (subjectCounts.get(subject) ?? 0) + 1);
+          });
+        });
+
+        const renderTarget = (target) => {
+          if (!target) return;
+          target.innerHTML = '';
+
+          const subjectsSection = document.createElement('section');
+          subjectsSection.className = 'space-y-3';
+          const subjectsHeading = document.createElement('h3');
+          subjectsHeading.className = 'text-xs font-semibold uppercase tracking-wide card__meta';
+          subjectsHeading.textContent = 'Subjects';
+          subjectsSection.appendChild(subjectsHeading);
+          const subjectsList = document.createElement('div');
+          subjectsList.className = 'flex flex-wrap gap-2';
+          Array.from(subjectCounts.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .forEach(([value, count]) => {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'facet-chip';
+              button.textContent = `${value} (${count})`;
+              button.dataset.facet = 'subjects';
+              button.dataset.value = value;
+              if (state.filters.subjects.includes(value)) button.classList.add('active');
+              button.addEventListener('click', () => toggleSubject(value));
+              subjectsList.appendChild(button);
+            });
+          subjectsSection.appendChild(subjectsList);
+          target.appendChild(subjectsSection);
+
+          const authorSection = document.createElement('section');
+          authorSection.className = 'space-y-2';
+          const authorLabel = document.createElement('label');
+          authorLabel.className = 'flex flex-col gap-2';
+          authorLabel.innerHTML = `
+            <span class="text-xs font-semibold uppercase tracking-wide card__meta">Author</span>
+            <input type="text" list="author-options" class="w-full rounded-full border border-[var(--line)] bg-white/90 px-4 py-2 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70" value="${escapeHtml(state.filters.author)}" placeholder="e.g., Augustine" />
+          `;
+          const authorInput = authorLabel.querySelector('input');
+          authorInput?.addEventListener('change', (event) => {
+            state.filters.author = event.target.value.trim();
+            applyState();
+          });
+          authorSection.appendChild(authorLabel);
+          target.appendChild(authorSection);
+
+          const eraSection = document.createElement('section');
+          eraSection.className = 'space-y-2';
+          const eraLabel = document.createElement('label');
+          eraLabel.className = 'flex flex-col gap-2';
+          const select = document.createElement('select');
+          select.className = 'w-full rounded-full border border-[var(--line)] bg-white/90 px-4 py-2 text-sm focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-100)] dark:border-slate-700 dark:bg-slate-900/70';
+          const anyOption = document.createElement('option');
+          anyOption.value = '';
+          anyOption.textContent = 'Any era';
+          select.appendChild(anyOption);
+          eraOptions.forEach((era) => {
+            const option = document.createElement('option');
+            option.value = era;
+            option.textContent = era;
+            if (era === state.filters.era) option.selected = true;
+            select.appendChild(option);
+          });
+          select.addEventListener('change', (event) => {
+            state.filters.era = event.target.value;
+            applyState();
+          });
+          eraLabel.innerHTML = '<span class="text-xs font-semibold uppercase tracking-wide card__meta">Era</span>';
+          eraLabel.appendChild(select);
+          eraSection.appendChild(eraLabel);
+          target.appendChild(eraSection);
+        };
+
+        renderTarget(facetsDesktop);
+        renderTarget(facetsMobile);
+      };
+
+      const toggleSubject = (value) => {
+        const values = new Set(state.filters.subjects ?? []);
+        values.has(value) ? values.delete(value) : values.add(value);
+        state.filters.subjects = Array.from(values);
+        applyState();
+      };
+
+      const runAndFilter = () => applyFilters(runSearch(state.query));
+
+      const renderResults = () => {
+        const hits = runAndFilter();
+        const count = hits.length;
+        const filtersActive = state.filters.subjects.length + (state.filters.author ? 1 : 0) + (state.filters.era ? 1 : 0);
+        const summary = filtersActive ? `${filtersActive} filter${filtersActive === 1 ? '' : 's'} active` : 'No filters active';
+        if (resultCount) resultCount.textContent = `${count} result${count === 1 ? '' : 's'}`;
+        if (resultSummary) resultSummary.textContent = `Showing ${count} item${count === 1 ? '' : 's'}`;
+        if (filterSummary) filterSummary.textContent = summary;
+        [...clearDesktopButtons].forEach((button) => {
+          button.hidden = filtersActive === 0 && !state.query;
+        });
+        if (clearMobileButton) {
+          clearMobileButton.hidden = filtersActive === 0 && !state.query;
+        }
+
+        if (resultsRegion) {
+          if (!count) {
+            resultsRegion.innerHTML = `<p class="card text-center text-sm" style="border-style:dashed;border-color:var(--line);box-shadow:none">No records match “${escapeHtml(state.query)}”. Reset filters or browse highlighted subjects.</p>`;
+          } else {
+            const grid = document.createElement('div');
+            grid.className = 'results-grid';
+            grid.setAttribute('role', 'list');
+            grid.innerHTML = hits.map((record) => renderBook(record)).join('');
+            resultsRegion.innerHTML = '';
+            resultsRegion.appendChild(grid);
+            window.WaypointBookCards?.mount(grid);
+          }
+        }
+      };
+
+      const applyState = () => {
+        updateUrl();
+        renderResults();
+        renderFacets();
+      };
+
+      const clearAll = () => {
+        state.query = '';
+        state.filters = { subjects: [], author: '', era: '' };
+        if (searchInput) searchInput.value = '';
+        applyState();
+      };
+
+      const debounce = (fn, delay = 200) => {
+        let timer;
+        return (...args) => {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn(...args), delay);
+        };
+      };
+
+      const onInput = debounce((event) => {
+        state.query = event.target.value;
+        applyState();
+      }, 200);
+
+      if (searchInput) {
+        searchInput.addEventListener('input', onInput);
+        searchInput.addEventListener('search', (event) => {
+          state.query = event.target.value;
+          applyState();
+        });
+      }
+
+      [...clearDesktopButtons].forEach((button) => button.addEventListener('click', clearAll));
+      clearMobileButton?.addEventListener('click', clearAll);
+
+      if (openDrawerButton && drawer && drawerPanel) {
+        openDrawerButton.addEventListener('click', () => {
+          drawer.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            drawerPanel.style.transform = 'translateX(0)';
+            openDrawerButton.setAttribute('aria-expanded', 'true');
+          });
+        });
+      }
+
+      const closeDrawer = () => {
+        if (!drawer || !drawerPanel) return;
+        drawerPanel.style.transform = '';
+        openDrawerButton?.setAttribute('aria-expanded', 'false');
+        drawerPanel.addEventListener(
+          'transitionend',
+          () => {
+            drawer.classList.add('hidden');
+          },
+          { once: true }
+        );
+      };
+
+      closeDrawerButton?.addEventListener('click', closeDrawer);
+      drawer?.addEventListener('click', (event) => {
+        if (event.target === drawer) closeDrawer();
+      });
+
+      renderResults();
+      renderFacets();
+    }
+  </script>
 </SearchLayout>
