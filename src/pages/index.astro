@@ -1,26 +1,255 @@
 ---
 import Base from '../layouts/Base.astro';
 import ResultsGrid from '../components/ResultsGrid.astro';
+import RecordShelf from '../components/RecordShelf.astro';
+import SearchBox from '../components/SearchBox.astro';
 import records from '../data/new-arrivals.json';
+import subjects from '../data/subjects.json';
+
+const spotlightSeedData = JSON.stringify(records).replace(/</g, '\\u003c');
+const spotlightFallback = records[0];
+
+const subjectCounts = new Map<string, number>();
+for (const record of records) {
+  for (const subject of record.subjects ?? []) {
+    subjectCounts.set(subject, (subjectCounts.get(subject) ?? 0) + 1);
+  }
+}
+
+let topSubjects = Array.from(subjectCounts.entries())
+  .sort((a, b) => {
+    if (a[1] === b[1]) return a[0].localeCompare(b[0]);
+    return b[1] - a[1];
+  })
+  .slice(0, 6)
+  .map(([subject]) => subject);
+
+if (topSubjects.length < 6) {
+  for (const subject of subjects) {
+    if (topSubjects.length >= 6) break;
+    if (!topSubjects.includes(subject)) topSubjects.push(subject);
+  }
+}
+
+const uniqueCollections = Array.from(new Set(records.map((record) => record.collection).filter(Boolean)));
+const shelves = (uniqueCollections.length ? uniqueCollections : ['Featured volumes']).map((collection, index) => ({
+  id: `shelf-${index}-${String(collection).replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'featured'}`,
+  label: `${collection} shelf`,
+  records: records.filter((record) => record.collection === collection || uniqueCollections.length === 0)
+}));
+
+const stats = [
+  { label: 'Records edited', value: records.length },
+  { label: 'Collections represented', value: uniqueCollections.length || 1 },
+  { label: 'Distinct subjects', value: subjectCounts.size || topSubjects.length }
+];
 ---
 <Base>
-  <section class="mx-auto max-w-6xl px-6 py-16">
-    <div class="grid gap-8 md:grid-cols-2 md:items-center">
-      <div class="space-y-6">
-        <p class="text-sm font-semibold uppercase tracking-widest text-primary-500">Waypoint Institute Library Editions</p>
-        <h1 class="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Scholarly digital editions, fully open.</h1>
-        <p class="text-lg text-slate-600 dark:text-slate-300">
-          Waypoint Digital Library is a static-first publishing stack for enduring access to humanities texts. Explore curated collections, authoritative metadata, and high-quality EPUB and PDF outputs—all built with Astro and GitHub Actions.
+  <section
+    class="hero mx-auto max-w-6xl px-6"
+    x-data="heroSpotlight(JSON.parse($el.dataset.records))"
+    x-init="init()"
+    data-records={spotlightSeedData}
+  >
+    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+      <div class="space-y-8">
+        <p class="text-sm font-semibold uppercase tracking-[0.35em]" style="color: var(--brand)">
+          Waypoint Institute Library Editions
         </p>
-        <div class="flex gap-4">
-          <a href="/browse" class="rounded-full bg-primary-500 px-6 py-3 text-sm font-semibold text-white shadow">Browse Library</a>
-          <a href="/policies/collection" class="rounded-full border border-primary-500 px-6 py-3 text-sm font-semibold text-primary-600">Policies</a>
+        <h1>Explore carefully edited public-domain works.</h1>
+        <p>
+          Download EPUB or PDF, read online, and trace provenance without friction. Every edition comes with curated metadata,
+          citation helpers, and preservation-ready files.
+        </p>
+        <div class="w-full max-w-xl">
+          <SearchBox minimal={false} />
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a href="/browse" class="button">Browse the stacks</a>
+          <button type="button" class="button secondary" @click="next()">
+            Shuffle spotlight
+          </button>
         </div>
       </div>
-      <div class="rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/70">
-        <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-100">New Arrivals</h2>
+      <aside
+        class="space-y-6"
+        style="background: var(--panel); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px); padding: 2rem; box-shadow: var(--shadow)"
+        aria-live="polite"
+      >
+        <p class="text-sm font-semibold uppercase tracking-[0.35em]" style="color: var(--brand)">Spotlight</p>
+        <div class="flex flex-col gap-6" role="group" aria-roledescription="Featured record">
+          <div class="flex gap-4">
+            <div class="relative h-36 w-28 overflow-hidden rounded-xl border" style="border-color: var(--line); background: var(--panel)">
+              <img
+                x-show="current.coverUrl"
+                x-transition
+                src={spotlightFallback?.coverUrl ?? ''}
+                :src="current.coverUrl"
+                :alt="`Cover art for ${current.title}`"
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+              <div
+                x-show="!current.coverUrl"
+                class="flex h-full w-full items-center justify-center text-xl font-semibold uppercase tracking-widest"
+                style="background: var(--brand-100); color: var(--brand-600)"
+              >
+                {spotlightFallback?.title?.slice(0, 1)}
+              </div>
+            </div>
+            <div class="space-y-2">
+              <h2 class="text-2xl font-semibold" style="color: var(--ink)" x-text="current.title">
+                {spotlightFallback.title}
+              </h2>
+              <p class="card__meta" x-text="current.creators.join(', ')">
+                {spotlightFallback.creators?.join(', ')}
+              </p>
+              <p class="card__meta text-xs uppercase tracking-[0.35em]" x-text="`${current.collection} · ${current.year}`">
+                {spotlightFallback.collection} · {spotlightFallback.year}
+              </p>
+            </div>
+          </div>
+          <div class="card__tags" role="list">
+            <template x-for="subject in current.subjects" :key="subject">
+              <span role="listitem" class="chip" x-text="subject"></span>
+            </template>
+            <noscript>
+              {spotlightFallback?.subjects?.map((subject) => (
+                <span class="chip">
+                  {subject}
+                </span>
+              ))}
+            </noscript>
+          </div>
+          <div>
+            <a
+              class="button"
+              href={spotlightFallback?.permalink ?? '#'}
+              :href="current.permalink"
+            >
+              Open record
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div class="mt-16 space-y-16">
+      <div class="stat-band" role="list" aria-label="Library snapshot">
+        {stats.map((stat) => (
+          <div role="listitem">
+            <strong>{stat.value.toLocaleString()}</strong>
+            <span class="card__meta text-sm">{stat.label}</span>
+          </div>
+        ))}
+      </div>
+      {shelves.map((shelf) => (
+        <RecordShelf {...shelf} />
+      ))}
+      <div class="space-y-4">
+        <h2 class="text-2xl font-semibold">Browse by subject</h2>
+        <div class="flex flex-wrap gap-3">
+          {topSubjects.map((subject) => (
+            <a class="chip" href={`/search/?subject=${encodeURIComponent(subject)}`}>
+              {subject}
+            </a>
+          ))}
+        </div>
+      </div>
+      <div class="space-y-6">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <h2 class="text-2xl font-semibold">New arrivals</h2>
+          <p class="card__meta text-sm">Updated as new editions are published.</p>
+        </div>
         <ResultsGrid results={records} />
       </div>
     </div>
   </section>
+  <script type="module">
+    document.addEventListener('alpine:init', () => {
+      window.heroSpotlight = (records) => ({
+        records,
+        order: [],
+        index: 0,
+        get current() {
+          return this.records[this.order[this.index]] ?? this.records[0] ?? {};
+        },
+        init() {
+          this.order = this.seededOrder();
+          this.index = 0;
+        },
+        seededOrder() {
+          const today = new Date().toISOString().slice(0, 10);
+          let seed = 0;
+          for (const char of today) {
+            seed = (seed * 31 + char.charCodeAt(0)) % 2147483647;
+          }
+          if (seed === 0) seed = 1;
+          const indices = this.records.map((_, idx) => idx);
+          let state = seed;
+          for (let i = indices.length - 1; i > 0; i--) {
+            state = (state * 1103515245 + 12345) % 2147483647;
+            const j = state % (i + 1);
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+          }
+          return indices;
+        },
+        next() {
+          if (!this.records.length) return;
+          this.index = (this.index + 1) % this.records.length;
+        }
+      });
+    });
+
+    const initShelves = () => {
+      document.querySelectorAll('[data-shelf]').forEach((shelf) => {
+        const list = shelf.querySelector('[data-shelf-list]');
+        const items = Array.from(list?.querySelectorAll('[data-shelf-item]') ?? []);
+        if (!list || items.length === 0) return;
+        let index = 0;
+        const setActive = (nextIndex) => {
+          const clamped = Math.max(0, Math.min(nextIndex, items.length - 1));
+          if (clamped === index) return;
+          items[index].tabIndex = -1;
+          items[index].setAttribute('aria-selected', 'false');
+          index = clamped;
+          items[index].tabIndex = 0;
+          items[index].setAttribute('aria-selected', 'true');
+          items[index].focus();
+          items[index].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        };
+
+        list.addEventListener('keydown', (event) => {
+          if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            setActive(index + 1);
+          } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            setActive(index - 1);
+          }
+        });
+
+        items.forEach((item, itemIndex) => {
+          item.addEventListener('focus', () => {
+            items[index].setAttribute('aria-selected', 'false');
+            items[index].tabIndex = -1;
+            index = itemIndex;
+            items[index].tabIndex = 0;
+            items[index].setAttribute('aria-selected', 'true');
+          });
+        });
+
+        const prev = shelf.querySelector('[data-shelf-prev]');
+        const next = shelf.querySelector('[data-shelf-next]');
+        prev?.addEventListener('click', () => setActive(index - 1));
+        next?.addEventListener('click', () => setActive(index + 1));
+      });
+    };
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initShelves();
+    } else {
+      document.addEventListener('DOMContentLoaded', initShelves);
+    }
+  </script>
 </Base>
