@@ -388,3 +388,32 @@ button:focus-visible,
   max-width: 60ch;
   font-size: 1.05rem;
 }
+
+.nav-link {
+  @apply rounded-full px-3 py-2 text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white;
+}
+
+.nav-link[aria-current='page'] {
+  @apply bg-primary-100 text-primary-700 dark:bg-primary-600/20 dark:text-primary-200;
+}
+
+.facet-chip {
+  @apply rounded-full border border-slate-300 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800;
+}
+
+.facet-chip.active {
+  @apply border-primary-500 bg-primary-50 text-primary-700 dark:border-primary-400 dark:bg-primary-900/20 dark:text-primary-200;
+}
+
+.skip-link {
+  @apply -translate-y-full opacity-0 transition;
+}
+
+:focus-visible {
+  @apply outline outline-2 outline-offset-2 outline-primary-500;
+}
+
+button:focus-visible,
+[role='button']:focus-visible {
+  @apply outline outline-2 outline-offset-2 outline-primary-500;
+}
