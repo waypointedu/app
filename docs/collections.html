@@ -1,37 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-base-path="">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Collections · Waypoint Digital Library</title>
-    <link rel="stylesheet" href="./assets/css/style.css" />
+    <title>Collections · Waypoint Institute Library</title>
+    <meta
+      name="description"
+      content="Curated groupings of the Waypoint Institute Library’s digitized holdings, organized for study and teaching."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
   </head>
-  <body>
-    <header>
-      <div class="grid" style="gap: 0.5rem;">
-        <strong>Waypoint Digital Library</strong>
-        <nav>
-          <a href="./index.html">Home</a>
-          <a href="./search/index.html">Search</a>
-          <a href="./collections.html">Collections</a>
-          <a href="./policies.html">Policies</a>
-        </nav>
+  <body class="site">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="announcement">
+      <div class="announcement__inner">
+        <span>Official library of the Waypoint Institute</span>
+        <a href="policies.html#preservation">Preservation &amp; provenance</a>
+      </div>
+    </div>
+    <header class="site-header" role="banner">
+      <div class="site-header__inner">
+        <div class="site-header__left">
+          <a href="index.html" class="site-header__brand">
+            <span class="site-header__crest" aria-hidden="true">WI</span>
+            <span class="site-header__title">
+              <span class="site-header__eyebrow">Waypoint Institute</span>
+              <span class="site-header__name">Library &amp; Archives</span>
+            </span>
+          </a>
+          <nav class="site-header__nav" aria-label="Primary navigation">
+            <a class="nav-link" href="index.html">Home</a>
+            <a class="nav-link" aria-current="page" href="collections.html">Browse</a>
+            <a class="nav-link" href="search/">Search</a>
+            <a class="nav-link" href="policies.html">Policies</a>
+          </nav>
+        </div>
+        <form class="site-header__search" action="search/" method="get">
+          <label for="header-search" class="sr-only">Search the library</label>
+          <input
+            id="header-search"
+            class="search-field"
+            type="search"
+            name="q"
+            placeholder="Search titles or subjects"
+          />
+        </form>
       </div>
     </header>
-    <main>
-      <h1>Collections</h1>
-      <p>The library organizes works into curated collections to help you explore themes and editorial programs.</p>
-      <section id="classics" class="card" style="margin-top: 2rem;">
-        <h2>Classics</h2>
-        <p>Proofread, professionally typeset editions of enduring public-domain works.</p>
-        <ul>
-          <li><a href="./record/2025-0004/index.html">Persuasion</a> · Jane Austen (1891)</li>
-          <li><a href="./record/2025-0003/index.html">The Confessions</a> · Augustine of Hippo (1900)</li>
-        </ul>
+    <main id="main-content" class="main">
+      <section class="collection-page">
+        <header class="collection-page__head">
+          <h1>Collections</h1>
+          <p>
+            Each collection represents an editorial program stewarded by the Waypoint Institute. Editions are fully sourced,
+            referenced, and prepared for scholarly use.
+          </p>
+        </header>
+        <article class="card collection-card">
+          <header>
+            <h2>Classics</h2>
+            <p class="card__meta">Proofread, typeset editions of enduring public-domain works.</p>
+          </header>
+          <ul>
+            <li>
+              <a href="record/2025-0004/">Persuasion</a>
+              <span class="card__meta"> · Jane Austen (1891)</span>
+            </li>
+            <li>
+              <a href="record/2025-0003/">The Confessions</a>
+              <span class="card__meta"> · Augustine of Hippo (1900)</span>
+            </li>
+          </ul>
+        </article>
       </section>
     </main>
-    <footer>
-      &copy; 2025 Waypoint Institute Library Editions. Hosted on GitHub Pages.
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__about">
+          <p class="site-footer__title">Waypoint Institute Library &amp; Archives</p>
+          <p>Curating scholarly editions in service of the Waypoint Institute community.</p>
+          <p class="site-footer__motto">Est. 2025 · Toward that which truly is.</p>
+        </div>
+        <div class="site-footer__links">
+          <a href="policies.html#rights">Rights &amp; Permissions</a>
+          <a href="policies.html#takedown">Takedown Policy</a>
+          <a href="policies.html#preservation">Preservation Plan</a>
+        </div>
+      </div>
     </footer>
+    <script src="assets/js/app.js" type="module"></script>
   </body>
 </html>
