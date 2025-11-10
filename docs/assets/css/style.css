@@ -1116,6 +1116,7 @@ textarea:focus-visible {
   .site-header {
     position: sticky;
   }
+}
 
   .book {
     width: min(220px, 80vw);
@@ -1242,6 +1243,7 @@ body.site {
   .hero__grid {
     grid-template-columns: minmax(0, 1fr) 420px;
     align-items: flex-start;
+    gap: 3rem;
   }
 }
 
