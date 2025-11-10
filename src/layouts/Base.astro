@@ -1,4 +1,5 @@
 ---
+import '../assets/css/theme.css';
 import '../styles/base.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -6,20 +7,90 @@ import AnnouncementBar from '../components/AnnouncementBar.astro';
 const { title = 'Waypoint Digital Library', description = 'Scholarly, open digital editions produced statically with Astro.' } = Astro.props as Record<string, string>;
 ---
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-50 dark:bg-slate-950">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap"
+    />
     <slot name="head" />
   </head>
   <body class="min-h-screen flex flex-col">
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <AnnouncementBar />
     <Header />
-    <main class="flex-1">
+    <main id="main-content" class="flex-1">
       <slot />
     </main>
     <Footer />
+    <script type="module" is:inline>
+      const enhanceCard = (card) => {
+        if (!(card instanceof HTMLElement) || card.dataset.bookReady) return;
+        const toggles = card.querySelectorAll('[data-book-toggle]');
+        if (!toggles.length) {
+          card.dataset.bookReady = 'true';
+          return;
+        }
+        const back = card.querySelector('.book__face--back');
+        const setState = (flipped) => {
+          card.toggleAttribute('data-flipped', flipped);
+          card.dataset.flipped = flipped ? 'true' : 'false';
+          toggles.forEach((button) => button.setAttribute('aria-expanded', flipped ? 'true' : 'false'));
+          if (!flipped) return;
+          const summary = back?.querySelector('.book__summary');
+          if (summary instanceof HTMLElement) summary.focus();
+        };
+        const activate = (event) => {
+          if (event instanceof KeyboardEvent) {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+          } else {
+            event.preventDefault();
+          }
+          const flipped = card.hasAttribute('data-flipped');
+          setState(!flipped);
+        };
+
+        toggles.forEach((toggle) => {
+          toggle.addEventListener('click', activate);
+          if (!(toggle instanceof HTMLButtonElement)) {
+            toggle.addEventListener('keydown', activate);
+          }
+        });
+        card.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && card.hasAttribute('data-flipped')) {
+            setState(false);
+            const trigger = toggles[0];
+            if (trigger instanceof HTMLElement) trigger.focus();
+          }
+        });
+        const frontLink = card.querySelector('.book__stretched');
+        frontLink?.addEventListener('focus', () => {
+          if (card.hasAttribute('data-flipped')) setState(false);
+        });
+        card.dataset.bookReady = 'true';
+      };
+
+      const mountBookCards = (scope = document) => {
+        scope.querySelectorAll('[data-book-card]').forEach((card) => enhanceCard(card));
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => mountBookCards(), { once: true });
+      } else {
+        mountBookCards();
+      }
+
+      window.WaypointBookCards = {
+        mount: mountBookCards,
+        enhance: enhanceCard
+      };
+    </script>
   </body>
 </html>
