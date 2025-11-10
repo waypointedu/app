@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import ResultsGrid from '../components/ResultsGrid.astro';
 import RecordShelf from '../components/RecordShelf.astro';
 import SearchBox from '../components/SearchBox.astro';
 import records from '../data/new-arrivals.json';
@@ -38,10 +37,19 @@ const shelves = (uniqueCollections.length ? uniqueCollections : ['Featured volum
   records: records.filter((record) => record.collection === collection || uniqueCollections.length === 0)
 }));
 
-const stats = [
-  { label: 'Volumes digitized', value: records.length },
-  { label: 'Active collections', value: uniqueCollections.length || 1 },
-  { label: 'Subjects indexed', value: subjectCounts.size || topSubjects.length }
+const orientation = [
+  {
+    title: 'Search plainly',
+    description: 'Type a title, author, or subject in everyday language. Results update as you filter.',
+  },
+  {
+    title: 'Open the record',
+    description: 'Every book page explains provenance, download options, and how to cite the edition.',
+  },
+  {
+    title: 'Read your way',
+    description: 'Choose web, EPUB, or PDF. Notes and highlights stay accessible on any device.',
+  },
 ];
 ---
 <Base>
@@ -50,34 +58,34 @@ const stats = [
     data-spotlight-root
     data-spotlight-records={spotlightPayload}
   >
-    <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-      <div class="space-y-8">
-        <div class="flex items-center gap-4">
+    <div class="hero__layout">
+      <div class="hero__intro space-y-6">
+        <div class="hero__identity">
           <span class="hero__seal" aria-hidden="true">WI</span>
-          <div class="space-y-1">
-            <p class="text-xs font-semibold uppercase tracking-[0.35em]" style="color: var(--muted)">
-              Waypoint Institute
-            </p>
-            <p class="text-lg font-semibold" style="color: var(--ink)">Library &amp; Archives</p>
+          <div class="hero__labels">
+            <span class="hero__eyebrow">Waypoint Institute</span>
+            <span class="hero__name">Library &amp; Archives</span>
           </div>
         </div>
-        <h1>Guardians of the Institute&#39;s scholarly heritage.</h1>
+        <h1>Start your study with ready-to-read editions.</h1>
         <p class="hero__lede">
-          The official repository for the Waypoint Institute&#39;s classical, theological, and literary collections. Every digital
-          edition is annotated for provenance, verified for textual fidelity, and prepared for study in the hall or abroad.
+          Every title is prepared for first-time scholars: clear summaries, trusted provenance, and accessible reading modes in one place.
         </p>
         <div class="hero__search">
           <SearchBox minimal={false} />
         </div>
         <div class="hero__actions">
-          <a href="/browse" class="button">Browse the stacks</a>
-          <button type="button" class="button secondary" data-spotlight-shuffle>Shuffle spotlight</button>
+          <a href="/search" class="button">Browse the catalogue</a>
+          <a href="/policies.html#orientation" class="button secondary">New reader guide</a>
         </div>
       </div>
-      <aside class="card space-y-6" aria-live="polite">
-        <header class="flex items-center justify-between gap-4">
-          <h2 class="text-xl font-semibold" style="color: var(--ink)">Spotlight</h2>
-          <button type="button" class="button secondary" data-spotlight-shuffle>Shuffle spotlight</button>
+      <aside class="hero__spotlight card" aria-live="polite">
+        <header class="hero__spotlight-head">
+          <div>
+            <h2>Spotlight titles</h2>
+            <p>Curated daily for Institute readers.</p>
+          </div>
+          <button type="button" class="button secondary" data-spotlight-shuffle>Show different books</button>
         </header>
         <div class="results-grid" data-spotlight-grid role="list">
           {spotlightFallbacks.map((record) => (
@@ -88,36 +96,43 @@ const stats = [
         </div>
       </aside>
     </div>
-    <div class="mt-16 space-y-16">
-      <div class="stat-band" role="list" aria-label="Library snapshot">
-        {stats.map((stat) => (
-          <div role="listitem">
-            <strong>{stat.value.toLocaleString()}</strong>
-            <span class="card__meta text-sm">{stat.label}</span>
-          </div>
+    <div class="home-sections">
+      <section class="orientation card" aria-labelledby="orientation-heading">
+        <div class="orientation__head">
+          <h2 id="orientation-heading">How to use this library</h2>
+          <p>Follow three simple steps any time you need a text.</p>
+        </div>
+        <ol class="orientation__list">
+          {orientation.map((item) => (
+            <li>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+      <section class="home-shelves" aria-label="Collections to explore">
+        <div class="home-section-head">
+          <h2>Collections to explore</h2>
+          <p>Each shelf stays keyboard-friendly and works with screen readers.</p>
+        </div>
+        {shelves.map((shelf) => (
+          <RecordShelf {...shelf} />
         ))}
-      </div>
-      {shelves.map((shelf) => (
-        <RecordShelf {...shelf} />
-      ))}
-      <div class="space-y-4">
-        <h2 class="text-2xl font-semibold">Subjects of note</h2>
-        <div class="flex flex-wrap gap-3">
+      </section>
+      <section class="home-subjects card" aria-labelledby="subjects-heading">
+        <div class="home-section-head">
+          <h2 id="subjects-heading">Browse by subject</h2>
+          <p>Jump straight to popular areas of study.</p>
+        </div>
+        <div class="home-subjects__chips">
           {topSubjects.map((subject) => (
             <a class="chip" href={`/search/?subject=${encodeURIComponent(subject)}`}>
               {subject}
             </a>
           ))}
         </div>
-      </div>
-      <div class="space-y-6">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <h2 class="text-2xl font-semibold">Recent additions</h2>
-          <p class="card__meta text-sm">Updated as Institute-approved editions join the shelves.</p>
-        </div>
-        <ResultsGrid results={records} />
-      </div>
-      <ResultsGrid results={records} />
+      </section>
     </div>
   </section>
   <script type="module">

@@ -54,25 +54,23 @@
       </div>
     </header>
     <main id="main-content" class="main">
-      <section
+            <section
         class="hero"
         data-spotlight-root
         data-spotlight-records='[{"title":"The Confessions","creators":["Augustine of Hippo"],"year":1900,"subjects":["Patristics","Autobiography"],"collection":"Classics","quality":"A","abstract":"Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.","coverUrl":"/assets/img/confessions-cover.jpg","permalink":"/record/2025-0003"},{"title":"Persuasion","creators":["Jane Austen"],"year":1891,"subjects":["Fiction","Romance"],"collection":"Classics","quality":"A","abstract":"Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen's final completed novel.","coverUrl":"/assets/img/persuasion-cover.jpg","permalink":"/record/2025-0004"}]'
       >
-        <div class="hero__grid">
-          <div class="hero__copy">
+        <div class="hero__layout">
+          <div class="hero__intro">
             <div class="hero__identity">
               <span class="hero__seal" aria-hidden="true">WI</span>
               <div class="hero__labels">
-                <span class="hero__label">Waypoint Institute</span>
-                <span class="hero__label hero__label--strong">Library &amp; Archives</span>
+                <span class="hero__eyebrow">Waypoint Institute</span>
+                <span class="hero__name">Library &amp; Archives</span>
               </div>
             </div>
-            <h1>Guardians of the Institute&#39;s scholarly heritage.</h1>
+            <h1>Start your study with ready-to-read editions.</h1>
             <p class="hero__lede">
-              The official repository for the Waypoint Institute&#39;s classical, theological, and literary collections. Every
-              digital edition is annotated for provenance, verified for textual fidelity, and prepared for study in the
-              hall or abroad.
+              Every title is prepared for first-time scholars: clear summaries, trusted provenance, and accessible reading modes in one place.
             </p>
             <div class="hero__search">
               <form action="search/" method="get" class="hero__search-form">
@@ -88,14 +86,17 @@
               </form>
             </div>
             <div class="hero__actions">
-              <a href="search/" class="button">Browse the stacks</a>
-              <button type="button" class="button secondary" data-spotlight-shuffle>Shuffle spotlight</button>
+              <a href="search/" class="button">Browse the catalogue</a>
+              <a href="policies.html#orientation" class="button secondary">New reader guide</a>
             </div>
           </div>
-          <aside class="spotlight card" aria-live="polite">
-            <header class="spotlight__head">
-              <h2>Spotlight</h2>
-              <button type="button" class="button secondary" data-spotlight-shuffle>Shuffle spotlight</button>
+          <aside class="hero__spotlight card" aria-live="polite">
+            <header class="hero__spotlight-head">
+              <div>
+                <h2>Spotlight titles</h2>
+                <p>Curated daily for Institute readers.</p>
+              </div>
+              <button type="button" class="button secondary" data-spotlight-shuffle>Show different books</button>
             </header>
             <div class="results-grid" data-spotlight-grid role="list">
               <div role="listitem">
@@ -159,7 +160,7 @@
                           aria-controls="book-the-confessions-preview"
                           aria-label="Hide synopsis for The Confessions"
                         >
-                          Return to cover
+                          Close
                         </button>
                       </div>
                     </div>
@@ -170,10 +171,10 @@
                 <article class="book" data-book-card data-has-preview="true">
                   <div class="book__wrapper">
                     <div class="book__face book__face--front">
-                      <a class="book__stretched" href="record/2025-0004/" aria-labelledby="book-persuasio" aria-describedby="book-persuasio-meta">
+                      <a class="book__stretched" href="record/2025-0004/" aria-labelledby="book-persuasion" aria-describedby="book-persuasion-meta">
                         <span class="sr-only">Open record: Persuasion</span>
                       </a>
-                      <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="book-persuasio-preview" aria-expanded="false" aria-label="Show synopsis for Persuasion">
+                      <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="book-persuasion-preview" aria-expanded="false" aria-label="Show synopsis for Persuasion">
                         <img
                           src="/assets/img/persuasion-cover.jpg"
                           alt="Cover of Persuasion"
@@ -185,8 +186,8 @@
                         <span class="book__peek" aria-hidden="true">View synopsis</span>
                       </figure>
                       <div class="book__info">
-                        <h3 id="book-persuasio" class="book__title">Persuasion</h3>
-                        <p class="book__author" id="book-persuasio-meta">Jane Austen<span class="sep"> · </span>1891</p>
+                        <h3 id="book-persuasion" class="book__title">Persuasion</h3>
+                        <p class="book__author" id="book-persuasion-meta">Jane Austen<span class="sep"> · </span>1891</p>
                         <p class="card__meta text-xs uppercase tracking">Classics</p>
                         <div class="book__tags" role="list">
                           <span role="listitem" class="chip">Fiction</span>
@@ -201,21 +202,21 @@
                           data-book-toggle
                           aria-haspopup="true"
                           aria-expanded="false"
-                          aria-controls="book-persuasio-preview"
+                          aria-controls="book-persuasion-preview"
                           aria-label="Show synopsis for Persuasion"
                         >
                           Preview
                         </button>
                       </div>
                     </div>
-                    <div class="book__face book__face--back" id="book-persuasio-preview" role="region" aria-labelledby="book-persuasio-preview-title">
+                    <div class="book__face book__face--back" id="book-persuasion-preview" role="region" aria-labelledby="book-persuasion-preview-title">
                       <header>
-                        <h3 id="book-persuasio-preview-title">Persuasion</h3>
+                        <h3 id="book-persuasion-preview-title">Persuasion</h3>
                         <p class="book__author">Jane Austen<span class="sep"> · </span>1891</p>
                         <span class="chip">Classics</span>
                       </header>
                       <p class="book__summary" tabindex="-1">
-                        Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen's final completed novel.
+                        Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen&#39;s final completed novel.
                       </p>
                       <div class="book__actions">
                         <a class="button" href="record/2025-0004/">Open record</a>
@@ -224,10 +225,10 @@
                           class="book__preview-close"
                           data-book-toggle
                           aria-expanded="true"
-                          aria-controls="book-persuasio-preview"
+                          aria-controls="book-persuasion-preview"
                           aria-label="Hide synopsis for Persuasion"
                         >
-                          Return to cover
+                          Close
                         </button>
                       </div>
                     </div>
@@ -237,318 +238,202 @@
             </div>
           </aside>
         </div>
-        <div class="hero__tail">
-          <div class="stat-band" role="list" aria-label="Library snapshot">
-            <div role="listitem">
-              <strong>2</strong>
-              <span class="card__meta">Volumes digitized</span>
+        <div class="home-sections">
+          <section class="orientation card" aria-labelledby="orientation-heading">
+            <div class="orientation__head">
+              <h2 id="orientation-heading">How to use this library</h2>
+              <p>Follow three simple steps any time you need a text.</p>
             </div>
-            <div role="listitem">
-              <strong>1</strong>
-              <span class="card__meta">Active collections</span>
+            <ol class="orientation__list">
+              <li>
+                <h3>Search plainly</h3>
+                <p>Type a title, author, or subject in everyday language. Results update as you filter.</p>
+              </li>
+              <li>
+                <h3>Open the record</h3>
+                <p>Every book page explains provenance, download options, and how to cite the edition.</p>
+              </li>
+              <li>
+                <h3>Read your way</h3>
+                <p>Choose web, EPUB, or PDF. Notes and highlights stay accessible on any device.</p>
+              </li>
+            </ol>
+          </section>
+          <section class="home-shelves" aria-label="Collections to explore">
+            <div class="home-section-head">
+              <h2>Collections to explore</h2>
+              <p>Each shelf stays keyboard-friendly and works with screen readers.</p>
             </div>
-            <div role="listitem">
-              <strong>2</strong>
-              <span class="card__meta">Subjects indexed</span>
-            </div>
-          </div>
-          <section class="shelf" role="region" aria-label="Classics shelf" data-shelf>
-            <header class="shelf__head">
-              <div>
-                <h2>Classics</h2>
-                <p class="card__meta">Curated for the Waypoint Institute community.</p>
-              </div>
-              <div class="shelf__controls">
-                <button type="button" data-shelf-prev aria-label="Previous on Classics shelf">←</button>
-                <button type="button" data-shelf-next aria-label="Next on Classics shelf">→</button>
-              </div>
-            </header>
-            <div class="shelf__track" role="listbox" aria-label="Classics" aria-orientation="horizontal" tabindex="0" data-shelf-track>
-              <div class="item" role="option" tabindex="0" aria-selected="true" data-shelf-item>
-                <article class="book" data-book-card data-has-preview="true">
-                  <div class="book__wrapper">
-                    <div class="book__face book__face--front">
-                      <a class="book__stretched" href="record/2025-0003/" aria-labelledby="shelf-confessions" aria-describedby="shelf-confessions-meta">
-                        <span class="sr-only">Open record: The Confessions</span>
-                      </a>
-                      <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="shelf-confessions-preview" aria-expanded="false" aria-label="Show synopsis for The Confessions">
-                        <img
-                          src="/assets/img/confessions-cover.jpg"
-                          alt="Cover of The Confessions"
-                          loading="lazy"
-                          decoding="async"
-                          fetchpriority="low"
-                        />
-                        <span class="book__edge" aria-hidden="true"></span>
-                        <span class="book__peek" aria-hidden="true">View synopsis</span>
-                      </figure>
-                      <div class="book__info">
-                        <h3 id="shelf-confessions" class="book__title">The Confessions</h3>
-                        <p class="book__author" id="shelf-confessions-meta">Augustine of Hippo<span class="sep"> · </span>1900</p>
-                        <p class="card__meta text-xs uppercase tracking">Classics</p>
-                        <div class="book__tags" role="list">
-                          <span role="listitem" class="chip">Patristics</span>
-                          <span role="listitem" class="chip">Autobiography</span>
+            <section class="shelf" role="region" aria-label="Classics" data-shelf>
+              <header class="shelf__head">
+                <div>
+                  <h2 class="text-2xl font-semibold">Classics</h2>
+                  <p class="card__meta text-sm">Curated for the Waypoint Institute community.</p>
+                </div>
+                <div class="shelf__controls">
+                  <button type="button" data-shelf-prev aria-controls="shelf-classics-track" aria-label="Previous on Classics shelf">←</button>
+                  <button type="button" data-shelf-next aria-controls="shelf-classics-track" aria-label="Next on Classics shelf">→</button>
+                </div>
+              </header>
+              <div
+                id="shelf-classics-track"
+                class="shelf__track"
+                role="listbox"
+                aria-label="Classics"
+                aria-orientation="horizontal"
+                tabindex="0"
+                data-shelf-track
+              >
+                <div class="item" role="option" tabindex="0" aria-selected="true" data-shelf-item>
+                  <article class="book" data-book-card data-has-preview="true">
+
+                    <div class="book__wrapper">
+                      <div class="book__face book__face--front">
+                        <a class="book__stretched" href="record/2025-0003/" aria-labelledby="book-the-confessions" aria-describedby="book-the-confessions-meta">
+                          <span class="sr-only">Open record: The Confessions</span>
+                        </a>
+                        <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="book-the-confessions-preview" aria-expanded="false" aria-label="Show synopsis for The Confessions">
+                          <img
+                            src="/assets/img/confessions-cover.jpg"
+                            alt="Cover of The Confessions"
+                            loading="lazy"
+                            decoding="async"
+                            fetchpriority="low"
+                          />
+                          <span class="book__edge" aria-hidden="true"></span>
+                          <span class="book__peek" aria-hidden="true">View synopsis</span>
+                        </figure>
+                        <div class="book__info">
+                          <h3 id="book-the-confessions" class="book__title">The Confessions</h3>
+                          <p class="book__author" id="book-the-confessions-meta">Augustine of Hippo<span class="sep"> · </span>1900</p>
+                          <p class="card__meta text-xs uppercase tracking">Classics</p>
+                          <div class="book__tags" role="list">
+                            <span role="listitem" class="chip">Patristics</span>
+                            <span role="listitem" class="chip">Autobiography</span>
+                          </div>
+                        </div>
+                        <div class="book__footer">
+                          <span class="chip" aria-label="Quality grade A">Quality A</span>
+                          <button
+                            type="button"
+                            class="book__preview-button"
+                            data-book-toggle
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-controls="book-the-confessions-preview"
+                            aria-label="Show synopsis for The Confessions"
+                          >
+                            Preview
+                          </button>
                         </div>
                       </div>
-                      <div class="book__footer">
-                        <span class="chip" aria-label="Quality grade A">Quality A</span>
-                        <button
-                          type="button"
-                          class="book__preview-button"
-                          data-book-toggle
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                          aria-controls="shelf-confessions-preview"
-                          aria-label="Show synopsis for The Confessions"
-                        >
-                          Preview
-                        </button>
-                      </div>
-                    </div>
-                    <div class="book__face book__face--back" id="shelf-confessions-preview" role="region" aria-labelledby="shelf-confessions-preview-title">
-                      <header>
-                        <h3 id="shelf-confessions-preview-title">The Confessions</h3>
-                        <p class="book__author">Augustine of Hippo<span class="sep"> · </span>1900</p>
-                        <span class="chip">Classics</span>
-                      </header>
-                      <p class="book__summary" tabindex="-1">
-                        Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.
-                      </p>
-                      <div class="book__actions">
-                        <a class="button" href="record/2025-0003/">Open record</a>
-                        <button
-                          type="button"
-                          class="book__preview-close"
-                          data-book-toggle
-                          aria-expanded="true"
-                          aria-controls="shelf-confessions-preview"
-                          aria-label="Hide synopsis for The Confessions"
-                        >
-                          Return to cover
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              </div>
-              <div class="item" role="option" tabindex="-1" aria-selected="false" data-shelf-item>
-                <article class="book" data-book-card data-has-preview="true">
-                  <div class="book__wrapper">
-                    <div class="book__face book__face--front">
-                      <a class="book__stretched" href="record/2025-0004/" aria-labelledby="shelf-persuasion" aria-describedby="shelf-persuasion-meta">
-                        <span class="sr-only">Open record: Persuasion</span>
-                      </a>
-                      <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="shelf-persuasion-preview" aria-expanded="false" aria-label="Show synopsis for Persuasion">
-                        <img
-                          src="/assets/img/persuasion-cover.jpg"
-                          alt="Cover of Persuasion"
-                          loading="lazy"
-                          decoding="async"
-                          fetchpriority="low"
-                        />
-                        <span class="book__edge" aria-hidden="true"></span>
-                        <span class="book__peek" aria-hidden="true">View synopsis</span>
-                      </figure>
-                      <div class="book__info">
-                        <h3 id="shelf-persuasion" class="book__title">Persuasion</h3>
-                        <p class="book__author" id="shelf-persuasion-meta">Jane Austen<span class="sep"> · </span>1891</p>
-                        <p class="card__meta text-xs uppercase tracking">Classics</p>
-                        <div class="book__tags" role="list">
-                          <span role="listitem" class="chip">Fiction</span>
-                          <span role="listitem" class="chip">Romance</span>
+                      <div class="book__face book__face--back" id="book-the-confessions-preview" role="region" aria-labelledby="book-the-confessions-preview-title">
+                        <header>
+                          <h3 id="book-the-confessions-preview-title">The Confessions</h3>
+                          <p class="book__author">Augustine of Hippo<span class="sep"> · </span>1900</p>
+                          <span class="chip">Classics</span>
+                        </header>
+                        <p class="book__summary" tabindex="-1">
+                          Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.
+                        </p>
+                        <div class="book__actions">
+                          <a class="button" href="record/2025-0003/">Open record</a>
+                          <button
+                            type="button"
+                            class="book__preview-close"
+                            data-book-toggle
+                            aria-expanded="true"
+                            aria-controls="book-the-confessions-preview"
+                            aria-label="Hide synopsis for The Confessions"
+                          >
+                            Close
+                          </button>
                         </div>
                       </div>
-                      <div class="book__footer">
-                        <span class="chip" aria-label="Quality grade A">Quality A</span>
-                        <button
-                          type="button"
-                          class="book__preview-button"
-                          data-book-toggle
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                          aria-controls="shelf-persuasion-preview"
-                          aria-label="Show synopsis for Persuasion"
-                        >
-                          Preview
-                        </button>
+                    </div>
+                  </article>
+                </div>
+                <div class="item" role="option" tabindex="-1" aria-selected="false" data-shelf-item>
+                  <article class="book" data-book-card data-has-preview="true">
+                    <div class="book__wrapper">
+                      <div class="book__face book__face--front">
+                        <a class="book__stretched" href="record/2025-0004/" aria-labelledby="book-persuasion" aria-describedby="book-persuasion-meta">
+                          <span class="sr-only">Open record: Persuasion</span>
+                        </a>
+                        <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="book-persuasion-preview" aria-expanded="false" aria-label="Show synopsis for Persuasion">
+                          <img
+                            src="/assets/img/persuasion-cover.jpg"
+                            alt="Cover of Persuasion"
+                            loading="lazy"
+                            decoding="async"
+                            fetchpriority="low"
+                          />
+                          <span class="book__edge" aria-hidden="true"></span>
+                          <span class="book__peek" aria-hidden="true">View synopsis</span>
+                        </figure>
+                        <div class="book__info">
+                          <h3 id="book-persuasion" class="book__title">Persuasion</h3>
+                          <p class="book__author" id="book-persuasion-meta">Jane Austen<span class="sep"> · </span>1891</p>
+                          <p class="card__meta text-xs uppercase tracking">Classics</p>
+                          <div class="book__tags" role="list">
+                            <span role="listitem" class="chip">Fiction</span>
+                            <span role="listitem" class="chip">Romance</span>
+                          </div>
+                        </div>
+                        <div class="book__footer">
+                          <span class="chip" aria-label="Quality grade A">Quality A</span>
+                          <button
+                            type="button"
+                            class="book__preview-button"
+                            data-book-toggle
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-controls="book-persuasion-preview"
+                            aria-label="Show synopsis for Persuasion"
+                          >
+                            Preview
+                          </button>
+                        </div>
+                      </div>
+                      <div class="book__face book__face--back" id="book-persuasion-preview" role="region" aria-labelledby="book-persuasion-preview-title">
+                        <header>
+                          <h3 id="book-persuasion-preview-title">Persuasion</h3>
+                          <p class="book__author">Jane Austen<span class="sep"> · </span>1891</p>
+                          <span class="chip">Classics</span>
+                        </header>
+                        <p class="book__summary" tabindex="-1">
+                          Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen&#39;s final completed novel.
+                        </p>
+                        <div class="book__actions">
+                          <a class="button" href="record/2025-0004/">Open record</a>
+                          <button
+                            type="button"
+                            class="book__preview-close"
+                            data-book-toggle
+                            aria-expanded="true"
+                            aria-controls="book-persuasion-preview"
+                            aria-label="Hide synopsis for Persuasion"
+                          >
+                            Close
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div class="book__face book__face--back" id="shelf-persuasion-preview" role="region" aria-labelledby="shelf-persuasion-preview-title">
-                      <header>
-                        <h3 id="shelf-persuasion-preview-title">Persuasion</h3>
-                        <p class="book__author">Jane Austen<span class="sep"> · </span>1891</p>
-                        <span class="chip">Classics</span>
-                      </header>
-                      <p class="book__summary" tabindex="-1">
-                        Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen's final completed novel.
-                      </p>
-                      <div class="book__actions">
-                        <a class="button" href="record/2025-0004/">Open record</a>
-                        <button
-                          type="button"
-                          class="book__preview-close"
-                          data-book-toggle
-                          aria-expanded="true"
-                          aria-controls="shelf-persuasion-preview"
-                          aria-label="Hide synopsis for Persuasion"
-                        >
-                          Return to cover
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
+                  </article>
+                </div>
               </div>
-            </div>
+            </section>
           </section>
-          <section class="subjects">
-            <h2>Subjects of note</h2>
-            <div class="subjects__chips">
-              <a class="chip" href="search/?subject=Patristics">Patristics</a>
-              <a class="chip" href="search/?subject=Autobiography">Autobiography</a>
-              <a class="chip" href="search/?subject=Fiction">Fiction</a>
-              <a class="chip" href="search/?subject=Romance">Romance</a>
+          <section class="home-subjects card" aria-labelledby="subjects-heading">
+            <div class="home-section-head">
+              <h2 id="subjects-heading">Browse by subject</h2>
+              <p>Jump straight to popular areas of study.</p>
             </div>
-          </section>
-          <section class="recent">
-            <div class="recent__head">
-              <h2>Recent additions</h2>
-              <p class="card__meta">Updated as Institute-approved editions join the shelves.</p>
-            </div>
-            <div class="results-grid">
-              <article class="book" data-book-card data-has-preview="true">
-                <div class="book__wrapper">
-                  <div class="book__face book__face--front">
-                    <a class="book__stretched" href="record/2025-0003/" aria-labelledby="recent-confessions" aria-describedby="recent-confessions-meta">
-                      <span class="sr-only">Open record: The Confessions</span>
-                    </a>
-                    <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="recent-confessions-preview" aria-expanded="false" aria-label="Show synopsis for The Confessions">
-                      <img
-                        src="/assets/img/confessions-cover.jpg"
-                        alt="Cover of The Confessions"
-                        loading="lazy"
-                        decoding="async"
-                        fetchpriority="low"
-                      />
-                      <span class="book__edge" aria-hidden="true"></span>
-                      <span class="book__peek" aria-hidden="true">View synopsis</span>
-                    </figure>
-                    <div class="book__info">
-                      <h3 id="recent-confessions" class="book__title">The Confessions</h3>
-                      <p class="book__author" id="recent-confessions-meta">Augustine of Hippo<span class="sep"> · </span>1900</p>
-                      <p class="card__meta text-xs uppercase tracking">Classics</p>
-                      <div class="book__tags" role="list">
-                        <span role="listitem" class="chip">Patristics</span>
-                        <span role="listitem" class="chip">Autobiography</span>
-                      </div>
-                    </div>
-                    <div class="book__footer">
-                      <span class="chip" aria-label="Quality grade A">Quality A</span>
-                      <button
-                        type="button"
-                        class="book__preview-button"
-                        data-book-toggle
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        aria-controls="recent-confessions-preview"
-                        aria-label="Show synopsis for The Confessions"
-                      >
-                        Preview
-                      </button>
-                    </div>
-                  </div>
-                  <div class="book__face book__face--back" id="recent-confessions-preview" role="region" aria-labelledby="recent-confessions-preview-title">
-                    <header>
-                      <h3 id="recent-confessions-preview-title">The Confessions</h3>
-                      <p class="book__author">Augustine of Hippo<span class="sep"> · </span>1900</p>
-                      <span class="chip">Classics</span>
-                    </header>
-                    <p class="book__summary" tabindex="-1">
-                      Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.
-                    </p>
-                    <div class="book__actions">
-                      <a class="button" href="record/2025-0003/">Open record</a>
-                      <button
-                        type="button"
-                        class="book__preview-close"
-                        data-book-toggle
-                        aria-expanded="true"
-                        aria-controls="recent-confessions-preview"
-                        aria-label="Hide synopsis for The Confessions"
-                      >
-                        Return to cover
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-              <article class="book" data-book-card data-has-preview="true">
-                <div class="book__wrapper">
-                  <div class="book__face book__face--front">
-                    <a class="book__stretched" href="record/2025-0004/" aria-labelledby="recent-persuasion" aria-describedby="recent-persuasion-meta">
-                      <span class="sr-only">Open record: Persuasion</span>
-                    </a>
-                    <figure class="book__figure" data-book-toggle role="button" tabindex="0" aria-controls="recent-persuasion-preview" aria-expanded="false" aria-label="Show synopsis for Persuasion">
-                      <img
-                        src="/assets/img/persuasion-cover.jpg"
-                        alt="Cover of Persuasion"
-                        loading="lazy"
-                        decoding="async"
-                        fetchpriority="low"
-                      />
-                      <span class="book__edge" aria-hidden="true"></span>
-                      <span class="book__peek" aria-hidden="true">View synopsis</span>
-                    </figure>
-                    <div class="book__info">
-                      <h3 id="recent-persuasion" class="book__title">Persuasion</h3>
-                      <p class="book__author" id="recent-persuasion-meta">Jane Austen<span class="sep"> · </span>1891</p>
-                      <p class="card__meta text-xs uppercase tracking">Classics</p>
-                      <div class="book__tags" role="list">
-                        <span role="listitem" class="chip">Fiction</span>
-                        <span role="listitem" class="chip">Romance</span>
-                      </div>
-                    </div>
-                    <div class="book__footer">
-                      <span class="chip" aria-label="Quality grade A">Quality A</span>
-                      <button
-                        type="button"
-                        class="book__preview-button"
-                        data-book-toggle
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        aria-controls="recent-persuasion-preview"
-                        aria-label="Show synopsis for Persuasion"
-                      >
-                        Preview
-                      </button>
-                    </div>
-                  </div>
-                  <div class="book__face book__face--back" id="recent-persuasion-preview" role="region" aria-labelledby="recent-persuasion-preview-title">
-                    <header>
-                      <h3 id="recent-persuasion-preview-title">Persuasion</h3>
-                      <p class="book__author">Jane Austen<span class="sep"> · </span>1891</p>
-                      <span class="chip">Classics</span>
-                    </header>
-                    <p class="book__summary" tabindex="-1">
-                      Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen's final completed novel.
-                    </p>
-                    <div class="book__actions">
-                      <a class="button" href="record/2025-0004/">Open record</a>
-                      <button
-                        type="button"
-                        class="book__preview-close"
-                        data-book-toggle
-                        aria-expanded="true"
-                        aria-controls="recent-persuasion-preview"
-                        aria-label="Hide synopsis for Persuasion"
-                      >
-                        Return to cover
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
+            <div class="home-subjects__chips" role="list">
+              <a role="listitem" class="chip" href="/search/?subject=Patristics">Patristics</a>
+              <a role="listitem" class="chip" href="/search/?subject=Autobiography">Autobiography</a>
+              <a role="listitem" class="chip" href="/search/?subject=Fiction">Fiction</a>
+              <a role="listitem" class="chip" href="/search/?subject=Romance">Romance</a>
             </div>
           </section>
         </div>
