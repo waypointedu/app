@@ -1,0 +1,150 @@
+/* Waypoint Institute Library theme tokens */
+:root {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --ink: #12274b;
+  --muted: #4a5d7c;
+  --line: #ccd7ea;
+
+  --brand: #0f3e7c;
+  --brand-500: #1f5ea8;
+  --brand-600: #0b2f5f;
+  --brand-50: #f3f6ff;
+  --brand-100: #e3ecfb;
+  --brand-200: #c2d7f5;
+
+  --accent: #1b4f94;
+  --accent-soft: rgba(27, 79, 148, 0.14);
+  --focus-ring: rgba(15, 62, 124, 0.32);
+
+  --header-gradient: linear-gradient(120deg, #0b2f5f 0%, #15417c 55%, #1f5ea8 100%);
+  --hero-stone: radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.5) 0, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(circle at 80% 12%, rgba(255, 255, 255, 0.3) 0, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, rgba(239, 244, 255, 0.95), rgba(229, 236, 250, 0.88));
+
+  --book-edge: #d8dfef;
+  --book-shadow: rgba(12, 35, 74, 0.16);
+  --book-shadow-strong: rgba(12, 35, 74, 0.28);
+
+  --radius: 18px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow: 0 16px 32px rgba(12, 35, 74, 0.08);
+  --shadow-soft: 0 12px 26px rgba(12, 35, 74, 0.06);
+  --shadow-strong: 0 26px 40px rgba(12, 35, 74, 0.12);
+
+  --shelf-surface: linear-gradient(180deg, rgba(227, 236, 250, 0.9), rgba(210, 224, 245, 0.92));
+  --shelf-shadow: rgba(9, 24, 52, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #091124;
+    --panel: #0f172a;
+    --ink: #e2e9f8;
+    --muted: #95a6c5;
+    --line: #1b2740;
+
+    --brand: #6fa6ff;
+    --brand-500: #88b5ff;
+    --brand-600: #b6cbff;
+    --brand-50: #101d32;
+    --brand-100: #17243d;
+    --brand-200: #223452;
+
+    --accent: #7da7ff;
+    --accent-soft: rgba(111, 166, 255, 0.22);
+    --focus-ring: rgba(130, 178, 255, 0.38);
+
+    --header-gradient: linear-gradient(130deg, #081226 0%, #102349 55%, #16376c 100%);
+    --hero-stone: linear-gradient(180deg, rgba(18, 30, 50, 0.92), rgba(12, 21, 38, 0.94));
+
+    --book-edge: #1f2b40;
+    --book-shadow: rgba(0, 0, 0, 0.45);
+    --book-shadow-strong: rgba(0, 0, 0, 0.6);
+
+    --shadow: 0 18px 36px rgba(0, 0, 0, 0.34);
+    --shadow-soft: 0 14px 30px rgba(0, 0, 0, 0.28);
+    --shadow-strong: 0 28px 46px rgba(0, 0, 0, 0.5);
+
+    --shelf-surface: linear-gradient(180deg, rgba(20, 30, 52, 0.88), rgba(17, 26, 44, 0.92));
+    --shelf-shadow: rgba(0, 0, 0, 0.45);
+  }
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--brand);
+  color: #f8fbff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 180ms ease, box-shadow 200ms ease, background-color 180ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--brand-500);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(15, 62, 124, 0.25);
+}
+
+.button.secondary {
+  background: transparent;
+  border: 1px solid var(--brand-500);
+  color: var(--brand-500);
+  box-shadow: none;
+}
+
+.button.secondary:hover,
+.button.secondary:focus-visible {
+  background: color-mix(in srgb, var(--brand-500) 15%, transparent);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--brand-100);
+  color: var(--brand-600);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
