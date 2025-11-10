@@ -608,9 +608,16 @@ textarea:focus-visible {
 }
 
 .home-subjects__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.home-subjects__chips .chip {
+  justify-content: center;
+  text-align: center;
+  width: 100%;
 }
 
 .stat-band {
@@ -671,6 +678,16 @@ textarea:focus-visible {
 
 .book[data-flipped="true"] .book__wrapper {
   transform: rotateY(180deg);
+}
+
+.book[data-has-preview="true"]:focus-within .book__wrapper {
+  transform: rotateY(180deg);
+}
+
+@media (hover: hover) {
+  .book[data-has-preview="true"]:hover .book__wrapper {
+    transform: rotateY(180deg);
+  }
 }
 
 .book__face {
@@ -866,12 +883,24 @@ textarea:focus-visible {
   border-color: color-mix(in srgb, var(--brand-500) 70%, transparent);
 }
 
-.book[data-flipped="true"] .book__face--front {
+.book[data-flipped="true"] .book__face--front,
+.book[data-has-preview="true"]:focus-within .book__face--front {
   pointer-events: none;
 }
 
-.book[data-flipped="true"] .book__face--back {
+.book[data-flipped="true"] .book__face--back,
+.book[data-has-preview="true"]:focus-within .book__face--back {
   pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .book[data-has-preview="true"]:hover .book__face--front {
+    pointer-events: none;
+  }
+
+  .book[data-has-preview="true"]:hover .book__face--back {
+    pointer-events: auto;
+  }
 }
 
 .book__face--back {
