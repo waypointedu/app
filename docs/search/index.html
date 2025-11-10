@@ -3,126 +3,147 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Search — Waypoint Digital Library</title>
-    <meta name="description" content="Search open-access records across the Waypoint Digital Library with live filters and genre shelves." />
+    <title>Search — Waypoint Institute Library</title>
+    <meta
+      name="description"
+      content="Survey the Waypoint Institute Library catalogue with keyword, subject, author, and era filters."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap"
+    />
     <link rel="stylesheet" href="../assets/css/style.css" />
-    
   </head>
-  <body class="page-search">
-    <header>
-      <div class="container">
-        <nav>
-          <h1><a href="../index.html" class="brand">Waypoint Digital Library</a></h1>
-          <div class="links">
-            <a href="../index.html">Home</a>
-            <a href="../search/">Search</a>
-            <a href="../policies.html">Policies</a>
-          </div>
-        </nav>
+  <body class="site">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="announcement">
+      <div class="announcement__inner">
+        <span>Official library of the Waypoint Institute</span>
+        <a href="../policies.html#preservation">Preservation &amp; provenance</a>
+      </div>
+    </div>
+    <header class="site-header" role="banner">
+      <div class="site-header__inner">
+        <div class="site-header__left">
+          <a href="../index.html" class="site-header__brand">
+            <span class="site-header__crest" aria-hidden="true">WI</span>
+            <span class="site-header__title">
+              <span class="site-header__eyebrow">Waypoint Institute</span>
+              <span class="site-header__name">Library &amp; Archives</span>
+            </span>
+          </a>
+          <nav class="site-header__nav" aria-label="Primary navigation">
+            <a class="nav-link" href="../index.html">Home</a>
+            <a class="nav-link" href="../collections.html">Browse</a>
+            <a class="nav-link" aria-current="page" href="../search/">Search</a>
+            <a class="nav-link" href="../policies.html">Policies</a>
+          </nav>
+        </div>
+        <form class="site-header__search" action="." method="get">
+          <label for="header-search" class="sr-only">Search the library</label>
+          <input
+            id="header-search"
+            class="search-field"
+            type="search"
+            name="q"
+            placeholder="Search titles or subjects"
+          />
+        </form>
       </div>
     </header>
-    <main>
-      <div class="container">
-        
-      <section class="search-hero">
-        <div>
-          <p class="eyebrow">Deep catalogue search</p>
-          <h2>Filter 2 records in real time.</h2>
-          <p>Search by keyword, collection, subject, or genre. Active filters appear as removable chips so you can experiment.</p>
-        </div>
-      </section>
-      <section class="search-shell" data-search-root>
-        <form class="search-form" data-search-form>
-          <div class="field">
-            <label for="search-input">Keyword</label>
-            <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search by title, author, or subject" data-search-input />
+    <main id="main-content" class="main">
+      <section
+        class="search"
+        data-search-app
+        data-records='[{"id":"2025-0004","title":"Persuasion","authors":["Jane Austen"],"creators":["Jane Austen"],"subjects":["Fiction","Romance"],"collection":"Classics","year":1891,"era":"Modern","lang":"en","quality":"A","abstract":"Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen\'s final completed novel.","permalink":"/record/2025-0004"},{"id":"2025-0003","title":"The Confessions","authors":["Augustine of Hippo"],"creators":["Augustine of Hippo"],"subjects":["Patristics","Autobiography"],"collection":"Classics","year":1900,"era":"Modern","lang":"en","quality":"A","abstract":"Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.","permalink":"/record/2025-0003"}]'
+      >
+        <header class="search__hero">
+          <div>
+            <p class="search__eyebrow">Waypoint Institute Library</p>
+            <h1>Catalogue of record</h1>
+            <p class="hero__lede">
+              Survey the Institute&#39;s edited holdings by title, author, subject, or era. Filters persist in the URL so faculty
+              and students can revisit the exact shelf they need.
+            </p>
           </div>
-          <div class="field-grid">
-            <label>
-              <span>Collection</span>
-              <select name="collection" data-filter-collection>
-                <option value="">Any collection</option>
-              </select>
-            </label>
-            <label>
-              <span>Subject</span>
-              <select name="subject" data-filter-subject>
-                <option value="">Any subject</option>
-              </select>
-            </label>
-            <label>
-              <span>Genre</span>
-              <select name="genre" data-filter-genre>
-                <option value="">Any genre</option>
-              </select>
-            </label>
+          <div class="search__form">
+            <label class="sr-only" for="search-input">Search the library</label>
+            <input
+              id="search-input"
+              type="search"
+              class="search-field"
+              placeholder="Search by title, author, or subject"
+              autocomplete="off"
+              data-search-input
+            />
           </div>
-          <div class="active-filters" data-active-filters role="list" aria-live="polite"></div>
-          <div class="form-footer">
-            <button type="button" class="button ghost" data-clear>Clear filters</button>
-            <p data-total>Loading index…</p>
-          </div>
-        </form>
-        <div class="search-results">
-          <ol class="results-list" data-results></ol>
-          <p class="empty" data-empty hidden>No records match your filters yet. Try widening your search terms.</p>
-        </div>
-      </section>
-      <section class="search-shelves" data-shelf-preview>
-        <header>
-          <h3>Preview the interactive shelves</h3>
-          <p>Jump into a shelf sequence or open a record to keep exploring.</p>
         </header>
-        <div class="shelf-preview" data-shelf-preview-grid>
-          
-          <article class="preview-group">
-            <h4>Autobiography</h4>
-            <div class="preview-track">
-              
-                    <a class="preview-card" href="../record/2025-0003/">
-                      <span class="preview-title">The Confessions</span>
-                      <span class="preview-meta">Augustine of Hippo · 1900</span>
-                    </a>
-                  
+        <div class="search__meta">
+          <span data-result-count>0 results</span>
+          <button type="button" class="button secondary" data-clear hidden>Clear all</button>
+        </div>
+        <div class="search__layout">
+          <aside class="search__facets">
+            <div class="search__facets-head">
+              <h2>Refine results</h2>
+              <button type="button" class="button secondary" data-clear hidden>Clear all</button>
             </div>
-          </article>
-        
-
-          <article class="preview-group">
-            <h4>Biography</h4>
-            <div class="preview-track">
-              
-                    <a class="preview-card" href="../record/2025-0003/">
-                      <span class="preview-title">The Confessions</span>
-                      <span class="preview-meta">Augustine of Hippo · 1900</span>
-                    </a>
-                  
+            <div class="search__facet">
+              <h3>Subjects</h3>
+              <div class="search__facet-options" data-subject-options></div>
             </div>
-          </article>
-        
-
-          <article class="preview-group">
-            <h4>Fiction</h4>
-            <div class="preview-track">
-              
-                    <a class="preview-card" href="../record/2025-0004/">
-                      <span class="preview-title">Persuasion</span>
-                      <span class="preview-meta">Jane Austen · 1891</span>
-                    </a>
-                  
+            <div class="search__facet">
+              <h3>Author</h3>
+              <input
+                type="text"
+                class="search-field"
+                list="author-options"
+                placeholder="e.g., Augustine"
+                data-author-input
+              />
+              <datalist id="author-options"></datalist>
             </div>
-          </article>
-        
+            <div class="search__facet">
+              <h3>Era</h3>
+              <select class="search-field" data-era-select>
+                <option value="">Any era</option>
+                <option>Ancient</option>
+                <option>Medieval</option>
+                <option>Renaissance</option>
+                <option>Early Modern</option>
+                <option>Modern</option>
+                <option>Contemporary</option>
+              </select>
+            </div>
+          </aside>
+          <div class="search__results">
+            <div class="search__results-meta">
+              <p data-result-summary>Showing 0 items</p>
+              <p data-filter-summary>No filters active</p>
+            </div>
+            <div class="search__chips" data-active-filters hidden></div>
+            <div data-results-region class="search__results-grid"></div>
+          </div>
         </div>
       </section>
-    
-      </div>
     </main>
-    <footer>
-      <div class="container">
-        <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__about">
+          <p class="site-footer__title">Waypoint Institute Library &amp; Archives</p>
+          <p>Curating scholarly editions in service of the Waypoint Institute community.</p>
+          <p class="site-footer__motto">Est. 2025 · Toward that which truly is.</p>
+        </div>
+        <div class="site-footer__links">
+          <a href="../policies.html#rights">Rights &amp; Permissions</a>
+          <a href="../policies.html#takedown">Takedown Policy</a>
+          <a href="../policies.html#preservation">Preservation Plan</a>
+        </div>
       </div>
     </footer>
-    <script type="module" src="../assets/js/search.js"></script>
+    <script src="../assets/js/app.js" type="module"></script>
+    <script src="../assets/js/search.js" type="module"></script>
   </body>
 </html>

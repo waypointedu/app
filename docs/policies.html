@@ -3,63 +3,130 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Policies — Waypoint Digital Library</title>
-    <meta name="description" content="Rights, preservation, and acquisition policies for the Waypoint Digital Library." />
+    <title>Policies — Waypoint Institute Library</title>
+    <meta
+      name="description"
+      content="Editorial, rights, and preservation policies governing the Waypoint Institute Library & Archives."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Literata:wght@600;700&display=swap"
+    />
     <link rel="stylesheet" href="assets/css/style.css" />
-    
   </head>
-  <body class="page-policies">
-    <header>
-      <div class="container">
-        <nav>
-          <h1><a href="index.html" class="brand">Waypoint Digital Library</a></h1>
-          <div class="links">
-            <a href="index.html">Home</a>
-            <a href="search/">Search</a>
-            <a href="policies.html">Policies</a>
-          </div>
-        </nav>
+  <body class="site">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="announcement">
+      <div class="announcement__inner">
+        <span>Official library of the Waypoint Institute</span>
+        <a href="#preservation">Preservation &amp; provenance</a>
+      </div>
+    </div>
+    <header class="site-header" role="banner">
+      <div class="site-header__inner">
+        <div class="site-header__left">
+          <a href="index.html" class="site-header__brand">
+            <span class="site-header__crest" aria-hidden="true">WI</span>
+            <span class="site-header__title">
+              <span class="site-header__eyebrow">Waypoint Institute</span>
+              <span class="site-header__name">Library &amp; Archives</span>
+            </span>
+          </a>
+          <nav class="site-header__nav" aria-label="Primary navigation">
+            <a class="nav-link" href="index.html">Home</a>
+            <a class="nav-link" href="collections.html">Browse</a>
+            <a class="nav-link" href="search/">Search</a>
+            <a class="nav-link" aria-current="page" href="policies.html">Policies</a>
+          </nav>
+        </div>
+        <form class="site-header__search" action="search/" method="get">
+          <label for="header-search" class="sr-only">Search the library</label>
+          <input
+            id="header-search"
+            class="search-field"
+            type="search"
+            name="q"
+            placeholder="Search titles or subjects"
+          />
+        </form>
       </div>
     </header>
-    <main>
-      <div class="container">
-        
-      <section class="hero">
-        <div>
+    <main id="main-content" class="main">
+      <section class="policy-page">
+        <header class="policy-page__intro">
+          <h1>Library policies &amp; governance</h1>
+          <p>
+            These guidelines ensure every edition published by the Waypoint Institute Library is responsibly sourced,
+            preserved, and governed with academic rigor.
+          </p>
+        </header>
+        <article class="policy-card" id="orientation">
+          <h2>Orientation for new readers</h2>
+          <p>
+            Start with plain-language searches, open the record for context and downloads, and choose the reading format that
+            works best for you. Library staff can assist with citations or accessibility adjustments at any time.
+          </p>
+          <ul>
+            <li>Search by title, author, or subject—filters narrow results without losing your place.</li>
+            <li>Each record page explains provenance, edition notes, and how to cite the work.</li>
+            <li>Download EPUB or PDF, or read online with adjustable type and contrast options.</li>
+          </ul>
+        </article>
+        <article class="policy-card" id="rights">
           <h2>Collection development &amp; rights</h2>
-          <p>We focus on public-domain and openly licensed texts suitable for research and teaching. Every item is vetted for provenance, rights status, and editorial quality before publication.</p>
-        </div>
-      </section>
-      <section class="policy-grid">
-        <article>
-          <h3>Acquisition principles</h3>
+          <p>
+            We focus on public-domain and openly licensed texts suitable for research and teaching. Every item is vetted for
+            provenance, rights status, and editorial quality before publication.
+          </p>
           <ul>
             <li>Preference for texts with established scholarly value or instructional demand.</li>
-            <li>Source materials must be public domain or released under an open license compatible with redistribution.</li>
-            <li>Digital assets over 25&nbsp;MB are mirrored to long-term repositories such as Zenodo or the Internet Archive.</li>
+            <li>Source materials must be public domain or released under an open license that permits redistribution.</li>
+            <li>Digital assets over 25&nbsp;MB are mirrored to Zenodo or the Internet Archive for redundancy.</li>
           </ul>
         </article>
-        <article>
-          <h3>Editorial guarantees</h3>
+        <article class="policy-card" id="takedown">
+          <h2>Rights &amp; takedown</h2>
+          <p>
+            If you believe a work infringes copyright or includes sensitive material, email
+            <a href="mailto:library@waypoint.institute">library@waypoint.institute</a> with the record ID and supporting
+            documentation. We review requests within five business days.
+          </p>
           <ul>
-            <li>Each edition is proofed and assigned a quality grade (A–C).</li>
-            <li>Downloads include EPUB, PDF, and an accessible HTML reading view.</li>
-            <li>Metadata is checked for completeness and accuracy prior to deployment.</li>
+            <li>We temporarily hide contested items during review.</li>
+            <li>We communicate outcomes to requesters and update public metadata when removals occur.</li>
+            <li>Valid takedowns prompt updates to the preservation manifest and search index.</li>
           </ul>
         </article>
-        <article>
-          <h3>Takedowns</h3>
-          <p>To request a takedown or raise a rights concern, open an issue using the <em>Takedown request</em> template or email <a href="mailto:library@waypoint.example">library@waypoint.example</a>. We respond within five business days.</p>
+        <article class="policy-card" id="preservation">
+          <h2>Preservation plan</h2>
+          <p>
+            All editions are stored in Git, exported to archival formats (HTML, EPUB, PDF), and synchronized to off-site
+            storage with checksum verification every quarter.
+          </p>
+          <ul>
+            <li>We maintain JSON-LD records for machine-readable provenance.</li>
+            <li>Checksums for downloadable assets ship alongside the static site.</li>
+            <li>Nightly GitHub Actions verify links, metadata, and build artifacts.</li>
+          </ul>
         </article>
       </section>
-    
-      </div>
     </main>
-    <footer>
-      <div class="container">
-        <p>&copy; 2025 Waypoint Institute Library Editions · Built as a static GitHub Pages site.</p>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__about">
+          <p class="site-footer__title">Waypoint Institute Library &amp; Archives</p>
+          <p>Curating scholarly editions in service of the Waypoint Institute community.</p>
+          <p class="site-footer__motto">Est. 2025 · Toward that which truly is.</p>
+        </div>
+        <div class="site-footer__links">
+          <a href="#rights">Rights &amp; Permissions</a>
+          <a href="#takedown">Takedown Policy</a>
+          <a href="#preservation">Preservation Plan</a>
+        </div>
       </div>
     </footer>
-    
+    <script src="assets/js/app.js" type="module"></script>
   </body>
 </html>

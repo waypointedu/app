@@ -1,273 +1,240 @@
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STORAGE_KEY = 'waypoint-spotlight';
 
-function safeParse(value, fallback) {
-  if (!value) return fallback;
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    console.warn('Unable to parse payload', error);
-    return fallback;
+const seededOrder = (length, key) => {
+  if (!length) return [];
+  let seed = 0;
+  for (const char of key) {
+    seed = (seed * 31 + char.charCodeAt(0)) % 2147483647;
   }
-}
-
-function createBookCard(record, { compact = false, showCta = false } = {}) {
-  const classes = ['book-card'];
-  if (compact) classes.push('book-card--compact');
-  const creators = Array.isArray(record.creators) ? record.creators.join(', ') : '';
-  const meta = [creators || null, record.year || null].filter(Boolean).join(' · ');
-  const topics = (record.subjects && record.subjects.length ? record.subjects : record.genres) || [];
-  const tags = topics
-    .slice(0, compact ? 2 : 4)
-    .map((subject) => `<span class="book-card__tag">${escapeHtml(subject)}</span>`)
-    .join('');
-  const link = record.permalink || '#';
-
-  return `
-    <article class="${classes.join(' ')}" data-record-id="${record.id}">
-      <a class="book-card__link" href="${escapeHtml(link)}">
-        <span class="book-card__spine" aria-hidden="true">
-          <span class="book-card__spine-title">${escapeHtml(record.title)}</span>
-          ${creators ? `<span class="book-card__spine-author">${escapeHtml(creators)}</span>` : ''}
-        </span>
-        <span class="book-card__cover">
-          <span class="book-card__title">${escapeHtml(record.title)}</span>
-          ${meta ? `<span class="book-card__meta">${escapeHtml(meta)}</span>` : ''}
-          ${tags ? `<span class="book-card__tags">${tags}</span>` : ''}
-        </span>
-      </a>
-      ${showCta ? `<a class="book-card__cta" href="${escapeHtml(link)}">Open record</a>` : ''}
-    </article>
-  `;
-}
-
-function createHeroMarkup(record) {
-  if (!record) {
-    return '<div class="hero-spotlight-card empty">New titles are on the way. Explore the shelves below.</div>';
+  if (seed === 0) seed = 1;
+  const indices = Array.from({ length }, (_, idx) => idx);
+  let state = seed;
+  for (let i = indices.length - 1; i > 0; i--) {
+    state = (state * 1103515245 + 12345) % 2147483647;
+    const j = state % (i + 1);
+    [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-  const meta = [];
-  if (Array.isArray(record.creators) && record.creators.length) {
-    meta.push(record.creators.join(', '));
-  }
-  if (record.year) {
-    meta.push(record.year);
-  }
-  const subjects = ((record.subjects && record.subjects.length ? record.subjects : record.genres) || [])
-    .slice(0, 3)
-    .map((genre) => `<span>${escapeHtml(genre)}</span>`)
-    .join('');
-  const permalink = record.permalink || '#';
+  return indices;
+};
 
-  return `
-    <div class="hero-spotlight-card" data-hero-card data-record="${record.id}">
-      <p class="eyebrow">Featured volume</p>
-      <h3>${escapeHtml(record.title)}</h3>
-      ${meta.length ? `<p class="meta">${escapeHtml(meta.join(' · '))}</p>` : ''}
-      ${subjects ? `<p class="meta meta--tags">${subjects}</p>` : ''}
-      <div class="hero-spotlight-book">${createBookCard(record, { showCta: false })}</div>
-      <a class="button" href="${permalink}">View record</a>
-    </div>
-  `;
-}
-
-function escapeHtml(value) {
-  return String(value)
+const escapeHtml = (value = '') =>
+  String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
 
-function hashToHue(value) {
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
+const renderBook = (record) => {
+  const title = escapeHtml(record.title ?? 'Untitled');
+  const safeId = (record.id ?? record.record_id ?? record.permalink ?? title)
+    .toString()
+    .replace(/[^a-z0-9]+/gi, '-')
+    .toLowerCase();
+  const cardId = `book-${safeId}`;
+  const metaId = `${cardId}-meta`;
+  const previewId = `${cardId}-preview`;
+  const previewTitleId = `${cardId}-preview-title`;
+  const permalink = record.permalink?.startsWith('/') ? record.permalink : `/${record.permalink ?? ''}`;
+  const authors = Array.isArray(record.creators)
+    ? record.creators.filter(Boolean)
+    : Array.isArray(record.authors)
+    ? record.authors.filter(Boolean)
+    : [];
+  const year = record.year ?? record.date ?? '';
+  const collection = record.collection ? escapeHtml(record.collection) : '';
+  const subjects = Array.isArray(record.subjects) ? record.subjects.slice(0, 3) : [];
+  const cover = record.coverUrl
+    ? `<img src="${escapeHtml(record.coverUrl)}" alt="Cover of ${title}" loading="lazy" decoding="async" fetchpriority="low" />`
+    : `<div class="book__fallback" aria-hidden="true">${escapeHtml(String(title).slice(0, 1).toUpperCase())}</div>`;
+  const authorsLine = authors.length
+    ? `${escapeHtml(authors.join(', '))}${year ? '<span class="sep"> · </span>' + escapeHtml(String(year)) : ''}`
+    : year
+    ? `<span class="book__year">${escapeHtml(String(year))}</span>`
+    : '';
+  const tags = subjects
+    .map((subject) => `<span role="listitem" class="chip">${escapeHtml(subject)}</span>`)
+    .join('');
+  const rawPreview = (() => {
+    const source = record.abstract ?? record.summary ?? '';
+    return typeof source === 'string' ? source.trim() : '';
+  })();
+  const preview = rawPreview ? escapeHtml(rawPreview) : '';
+  const hasPreview = preview.length > 0;
+  const quality = record.quality ?? record.quality_grade ?? '';
+  const qualityChip = quality
+    ? `<span class="chip" aria-label="Quality grade ${escapeHtml(String(quality))}">Quality ${escapeHtml(String(quality))}</span>`
+    : '<span class="card__meta text-xs" style="opacity:0.7">Digital edition</span>';
+  const toggleLabel = hasPreview ? `Show synopsis for ${title}` : '';
+  const returnLabel = hasPreview ? `Hide synopsis for ${title}` : '';
+  const peekPrompt = hasPreview ? '<span class="book__peek" aria-hidden="true">View synopsis</span>' : '';
+  const previewControl = hasPreview
+    ? `<button type="button" class="book__preview-button" data-book-toggle aria-haspopup="true" aria-expanded="false" aria-controls="${previewId}" aria-label="${toggleLabel}">Preview</button>`
+    : '<span class="card__meta text-xs" style="opacity:0.8">Open for full details</span>';
+
+  return `
+    <article class="book" role="article" data-book-card${hasPreview ? ' data-has-preview="true"' : ''}>
+      <div class="book__wrapper">
+        <div class="book__face book__face--front">
+          <a class="book__stretched" href="${escapeHtml(permalink)}" aria-labelledby="${cardId}" aria-describedby="${metaId}">
+            <span class="sr-only">Open record: ${title}</span>
+          </a>
+          <figure class="book__figure"${hasPreview ? ` data-book-toggle role="button" tabindex="0" aria-controls="${previewId}" aria-expanded="false" aria-label="${toggleLabel}"` : ''}>
+            ${cover}
+            <span class="book__edge" aria-hidden="true"></span>
+            ${peekPrompt}
+          </figure>
+          <div class="book__info">
+            <h3 id="${cardId}" class="book__title">${title}</h3>
+            ${authorsLine ? `<p class="book__author" id="${metaId}">${authorsLine}</p>` : ''}
+            ${collection ? `<p class="card__meta text-xs uppercase tracking" style="margin:0">${collection}</p>` : ''}
+            ${tags ? `<div class="book__tags" role="list">${tags}</div>` : ''}
+          </div>
+          <div class="book__footer">
+            ${qualityChip}
+            ${previewControl}
+          </div>
+        </div>
+        ${hasPreview ? `
+          <div class="book__face book__face--back" id="${previewId}" role="region" aria-labelledby="${previewTitleId}">
+            <header>
+              <h3 id="${previewTitleId}">${title}</h3>
+              ${authorsLine ? `<p class="book__author">${authorsLine}</p>` : ''}
+              ${collection ? `<span class="chip" style="width:fit-content">${collection}</span>` : ''}
+            </header>
+            <p class="book__summary" tabindex="-1">${preview}</p>
+            <div class="book__actions">
+              <a class="button" href="${escapeHtml(permalink)}">Open record</a>
+              <button type="button" class="book__preview-close" data-book-toggle aria-expanded="true" aria-controls="${previewId}" aria-label="${returnLabel}">Return to cover</button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </article>
+  `;
+};
+
+const initSpotlight = () => {
+  const root = document.querySelector('[data-spotlight-root]');
+  if (!root) return;
+  const grid = root.querySelector('[data-spotlight-grid]');
+  if (!grid) return;
+  let records = [];
+  try {
+    records = JSON.parse(root.dataset.spotlightRecords ?? '[]');
+  } catch (error) {
+    console.warn('Unable to parse spotlight data', error);
+    records = [];
   }
-  return Math.abs(hash) % 360;
-}
+  if (!records.length) return;
 
-function setHeroAccent(element, record) {
-  if (!element || !record || !record.id) return;
-  const hue = hashToHue(record.id);
-  element.style.setProperty('--hero-accent', `hsl(${hue} 70% 65%)`);
-}
-
-function animateStats() {
-  const counters = document.querySelectorAll('[data-stat][data-target]');
-  counters.forEach((counter) => {
-    const target = Number(counter.dataset.target);
-    if (!Number.isFinite(target)) return;
-    if (reduceMotion) {
-      counter.textContent = target;
-      return;
+  const dateKey = new Date().toISOString().slice(0, 10);
+  let order = null;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null');
+    if (stored?.key === dateKey && Array.isArray(stored.order)) {
+      order = stored.order;
     }
-    const duration = 900;
-    const startTime = performance.now();
-
-    function tick(now) {
-      const progress = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      counter.textContent = Math.round(target * eased);
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      }
+  } catch (error) {
+    console.warn('Unable to read stored spotlight order', error);
+  }
+  if (!order) {
+    order = seededOrder(records.length, dateKey);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ key: dateKey, order }));
+    } catch (error) {
+      console.warn('Unable to persist spotlight order', error);
     }
+  }
 
-    requestAnimationFrame(tick);
+  const sliceSize = Math.min(4, order.length);
+  let offset = 0;
+
+  const render = () => {
+    const selection = [];
+    for (let i = 0; i < sliceSize; i++) {
+      const index = order[(offset + i) % order.length];
+      selection.push(renderBook(records[index] ?? {}));
+    }
+    grid.innerHTML = selection.map((markup) => `<div role="listitem">${markup}</div>`).join('');
+    window.WaypointBookCards?.mount(grid);
+  };
+
+  const advance = () => {
+    offset = (offset + sliceSize) % order.length;
+    render();
+  };
+
+  root.querySelectorAll('[data-spotlight-shuffle]').forEach((button) => {
+    button.addEventListener('click', advance);
   });
-}
 
-function enhanceHero() {
-  const hero = document.querySelector('[data-hero]');
-  if (!hero) return;
-  const heroSpotlight = hero.querySelector('[data-hero-spotlight]');
-  const cycleButton = hero.querySelector('[data-hero-cycle]');
-  const payload = safeParse(hero.dataset.heroPayload, []);
-  if (!payload.length || !heroSpotlight) return;
+  render();
+};
 
-  let index = 0;
-
-  function update(newIndex) {
-    index = newIndex % payload.length;
-    const record = payload[index];
-    heroSpotlight.innerHTML = createHeroMarkup(record);
-    setHeroAccent(hero, record);
-  }
-
-  update(0);
-
-  if (cycleButton) {
-    cycleButton.addEventListener('click', () => {
-      update((index + 1) % payload.length);
-    });
-  }
-
-  if (!reduceMotion && payload.length > 1) {
-    setInterval(() => {
-      update((index + 1) % payload.length);
-    }, 10000);
-  }
-}
-
-function enhanceShelves() {
+const initShelves = () => {
   document.querySelectorAll('[data-shelf]').forEach((shelf) => {
     const track = shelf.querySelector('[data-shelf-track]');
+    const items = Array.from(track?.querySelectorAll('[data-shelf-item]') ?? []);
+    if (!track || !items.length) return;
+    let index = items.findIndex((item) => item.tabIndex === 0);
+    if (index < 0) index = 0;
+
+    const setActive = (nextIndex) => {
+      const clamped = Math.max(0, Math.min(nextIndex, items.length - 1));
+      if (clamped === index) {
+        items[index].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        return;
+      }
+      items[index].tabIndex = -1;
+      items[index].setAttribute('aria-selected', 'false');
+      index = clamped;
+      items[index].tabIndex = 0;
+      items[index].setAttribute('aria-selected', 'true');
+      items[index].focus();
+      items[index].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    };
+
+    track.addEventListener('focus', () => {
+      if (document.activeElement === track) {
+        items[index]?.focus();
+      }
+    });
+
+    track.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        setActive(index + 1);
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        setActive(index - 1);
+      }
+    });
+
+    items.forEach((item, itemIndex) => {
+      item.addEventListener('focus', () => {
+        items[index].setAttribute('aria-selected', 'false');
+        items[index].tabIndex = -1;
+        index = itemIndex;
+        items[index].tabIndex = 0;
+        items[index].setAttribute('aria-selected', 'true');
+      });
+    });
+
     const prev = shelf.querySelector('[data-shelf-prev]');
     const next = shelf.querySelector('[data-shelf-next]');
-    if (!track) return;
-
-    function updateButtons() {
-      if (!prev || !next) return;
-      const maxScroll = track.scrollWidth - track.clientWidth;
-      prev.disabled = track.scrollLeft <= 5;
-      next.disabled = track.scrollLeft >= maxScroll - 5;
-    }
-
-    prev?.addEventListener('click', () => {
-      track.scrollBy({ left: -track.clientWidth * 0.75, behavior: reduceMotion ? 'auto' : 'smooth' });
-    });
-    next?.addEventListener('click', () => {
-      track.scrollBy({ left: track.clientWidth * 0.75, behavior: reduceMotion ? 'auto' : 'smooth' });
-    });
-
-    track.addEventListener('scroll', () => {
-      window.requestAnimationFrame(updateButtons);
-    });
-
-    updateButtons();
-
-    if (!reduceMotion) {
-      track.addEventListener('pointermove', (event) => {
-        const rect = track.getBoundingClientRect();
-        const ratio = (event.clientX - rect.left) / rect.width;
-        const tilt = (ratio - 0.5) * 14;
-        track.style.setProperty('--shelf-tilt', `${tilt.toFixed(2)}deg`);
-      });
-      track.addEventListener('pointerleave', () => {
-        track.style.removeProperty('--shelf-tilt');
-      });
-    }
+    prev?.addEventListener('click', () => setActive(index - 1));
+    next?.addEventListener('click', () => setActive(index + 1));
   });
+};
+
+const init = () => {
+  initSpotlight();
+  initShelves();
+};
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  init();
+} else {
+  document.addEventListener('DOMContentLoaded', init);
 }
-
-function enhanceGenres() {
-  const shelf = document.querySelector('[data-genre-shelf]');
-  if (!shelf) return;
-  const controls = shelf.querySelector('[data-genre-controls]');
-  const panels = shelf.querySelectorAll('[data-genre-panel]');
-  if (!controls || !panels.length) return;
-
-  controls.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-genre-switch]');
-    if (!button) return;
-    const target = button.dataset.genreSwitch;
-    controls.querySelectorAll('button[data-genre-switch]').forEach((control) => {
-      control.classList.toggle('is-active', control === button);
-    });
-    panels.forEach((panel) => {
-      panel.classList.toggle('is-active', panel.dataset.genrePanel === target);
-    });
-  });
-}
-
-function bootstrapShelfPayload() {
-  const container = document.querySelector('[data-shelves]');
-  if (!container) return;
-  const payload = safeParse(container.dataset.shelfPayload, { carousels: [], genres: [] });
-  if (payload.carousels.length && payload.genres.length) {
-    container.classList.add('is-hydrated');
-  }
-}
-
-function enhanceAmbientHall() {
-  const hall = document.querySelector('[data-ambient-hall]');
-  if (!hall || reduceMotion) return;
-
-  hall.addEventListener('pointermove', (event) => {
-    const rect = hall.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width;
-    const y = (event.clientY - rect.top) / rect.height;
-    hall.style.setProperty('--pointer-x', x.toFixed(2));
-    hall.style.setProperty('--pointer-y', y.toFixed(2));
-  });
-
-  hall.addEventListener('pointerleave', () => {
-    hall.style.removeProperty('--pointer-x');
-    hall.style.removeProperty('--pointer-y');
-  });
-}
-
-function enhanceHeroGallery() {
-  const gallery = document.querySelector('[data-hero-gallery]');
-  if (!gallery) return;
-  const items = Array.from(gallery.querySelectorAll('.hero-gallery__item'));
-  if (items.length <= 1) return;
-
-  let index = 0;
-
-  function activate(newIndex) {
-    index = newIndex % items.length;
-    items.forEach((item, itemIndex) => {
-      item.classList.toggle('is-active', itemIndex === index);
-    });
-  }
-
-  activate(0);
-
-  if (!reduceMotion) {
-    setInterval(() => {
-      activate((index + 1) % items.length);
-    }, 9000);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  animateStats();
-  enhanceHero();
-  enhanceShelves();
-  enhanceGenres();
-  bootstrapShelfPayload();
-  enhanceAmbientHall();
-  enhanceHeroGallery();
-});

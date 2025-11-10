@@ -4,8 +4,9 @@
     "creators": ["Augustine of Hippo"],
     "year": 1900,
     "subjects": ["Patristics", "Autobiography"],
-    "collection": "Waypoint Classics",
+    "collection": "Classics",
     "quality": "A",
+    "abstract": "Augustine reflects on memory, desire, and the pursuit of God in this enduring spiritual autobiography.",
     "coverUrl": "/assets/img/confessions-cover.jpg",
     "permalink": "/record/2025-0003"
   },
@@ -14,8 +15,9 @@
     "creators": ["Jane Austen"],
     "year": 1891,
     "subjects": ["Fiction", "Romance"],
-    "collection": "Waypoint Classics",
+    "collection": "Classics",
     "quality": "A",
+    "abstract": "Anne Elliot reconciles duty and longing when a long-lost love returns to Bath in Austen's final completed novel.",
     "coverUrl": "/assets/img/persuasion-cover.jpg",
     "permalink": "/record/2025-0004"
   }
